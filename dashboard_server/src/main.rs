@@ -1,12 +1,18 @@
 use std::process::exit;
 
+use actix_web::{HttpServer, App, web, http::header, middleware::Logger};
 use actix_cors::Cors;
-use actix_web::{HttpServer, App, http::header, middleware::Logger};
+use actix_session::storage::CookieSessionStore;
+use actix_session::SessionMiddleware;
+use actix_identity::{Identity, IdentityMiddleware};
+use actix_web::cookie::Key;
 use dotenv::dotenv;
 use sqlx::postgres::{PgPool, PgPoolOptions};
 
 mod error;
 mod handler;
+mod schema;
+mod model;
 
 pub struct AppState {
     db: PgPool,
@@ -33,6 +39,8 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
+    let session_key = Key::generate();
+
     println!("🚀 Server started successfully!");
 
     HttpServer::new(move || {
@@ -47,10 +55,22 @@ async fn main() -> std::io::Result<()> {
             .supports_credentials();
 
         App::new()
-            .app_data(AppState{db: pool.clone()})
+            .app_data(
+                web::Data::new(
+                    AppState { 
+                        db: pool.clone() 
+                    })
+            )
             .configure(handler::config)
             .wrap(cors)
             .wrap(Logger::default())
+            .wrap(
+                SessionMiddleware::builder(CookieSessionStore::default(), session_key.clone())
+                        .cookie_secure(false)
+                        .cookie_name("_r_session_".to_string())
+                        .build()
+            )
+            .wrap(IdentityMiddleware::default())
     })
     .bind("127.0.0.1:8080")?
     .run()

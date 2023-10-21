@@ -1,5 +1,9 @@
 # Dashboard
 
+# Table of content
+1. [API](API.md)
+
+
 # Frontend
 ##### [Svelte](https://svelte.dev/) (Javascript)
 ###### Dependencies
