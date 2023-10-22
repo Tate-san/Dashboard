@@ -1,11 +1,10 @@
 use super::prelude::*;
 use actix_web::{HttpRequest, HttpMessage};
 use argon2::{self};
-use sqlx::any::AnyQueryResult;
 use crate::schema::UserRegisterSchema;
-use crate::model::{UserModel, user};
+use crate::model::UserModel;
 
-pub async fn user_register(web::Form(form): web::Form<UserRegisterSchema>, data: web::Data<AppState>) -> impl Responder {
+pub async fn user_register(web::Form(form): web::Form<UserRegisterSchema>, data: web::Data<AppState>) -> ServerResponse {
 
     let salt = b"SomeRandomSalt";
     let config = argon2::Config::default();
@@ -17,39 +16,31 @@ pub async fn user_register(web::Form(form): web::Form<UserRegisterSchema>, data:
         .bind(hashed_password)
         .bind(1)
         .execute(&data.db)
-        .await
-        .map_err(|err| err.to_string());
-
-    if let Err(err) = query {
-        if err.contains("duplicate key") {
-            return HttpResponse::BadRequest().json(
-            serde_json::json!({"status": "error","message": "User with this name already exists"}),
-        );
-        }
-
-        return HttpResponse::InternalServerError()
-            .json(serde_json::json!({"status": "error","message": format!("{:?}", err)}));
-    }
+        .await;
 
     match query {
-        Ok(_) => {
-            let response = serde_json::json!({"status": "success","data": "User successfully registered"});
-
-            return HttpResponse::Ok().json(response);
-        }
-        Err(e) => {
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({"status": "error","message": format!("{:?}", e)}));
+        Ok(_) => Ok(HttpResponse::Ok()
+                    .json(serde_json::json!({"status": "success","data": "User successfully registered"}))),
+        Err(error) => {
+            let message = error.to_string();
+            if message.contains("duplicate key"){
+                return Ok(HttpResponse::BadRequest()
+                    .json(serde_json::json!({"status": "error", "message": "User already exists with this name"})));
+            }
+            Err(error.into()) 
         }
     }
+
+    
+
 }
 
-pub async fn user_login(request: HttpRequest, web::Form(form): web::Form<UserRegisterSchema>, data: web::Data<AppState>) -> impl Responder {
+pub async fn user_login(request: HttpRequest, web::Form(form): web::Form<UserRegisterSchema>, data: web::Data<AppState>) -> ServerResponse {
 
     if form.username.is_empty() || form.password.is_empty() {
-        return HttpResponse::BadRequest().json(
+        return Ok(HttpResponse::BadRequest().json(
             serde_json::json!({"status": "error", "message": "Missing username or password"})
-        );
+        ));
     }
 
     let query = 
@@ -60,49 +51,39 @@ pub async fn user_login(request: HttpRequest, web::Form(form): web::Form<UserReg
     if let Err(error) = query {
         match error{
             sqlx::Error::RowNotFound => {
-                return HttpResponse::BadRequest()
-                    .json(serde_json::json!({"status": "error","message": "Invalid username or password"}));
+                return Ok(HttpResponse::BadRequest()
+                    .json(serde_json::json!({"status": "error","message": "Invalid username or password"})));
             }
             _ => {
-                return HttpResponse::InternalServerError()
-                    .json(serde_json::json!({"status": "error","message": format!("{:?}", error.to_string())}));
+                return Err(error.into());
             }
         }
     }
 
     let user = query.unwrap();
 
-    let password_verify = argon2::verify_encoded(&user.password, form.password.as_bytes());
+    let password_valid = argon2::verify_encoded(&user.password, form.password.as_bytes())?;
 
-    match password_verify {
-        Ok(valid) => {
-            if valid {
-                
-                Identity::login(&request.extensions(), user.user_id.to_string()).unwrap(); 
-                return HttpResponse::Ok().finish();
-            }
-
-            return HttpResponse::BadRequest()
-                .json(serde_json::json!({"status": "error", "message": "Invalid username or password"}));
-        }
-        Err(error) => {
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({"status": "error","message": format!("{:?}", error.to_string())}));
-        }
+    if password_valid {
+        Identity::login(&request.extensions(), user.user_id.to_string()).unwrap(); 
+        return Ok(HttpResponse::Ok().finish());
     }
+
+    return Ok(HttpResponse::BadRequest()
+        .json(serde_json::json!({"status": "error", "message": "Invalid username or password"})));
 
 }
 
 
-pub async fn user_logout(identity: Option<Identity>) -> impl Responder {
+pub async fn user_logout(identity: Option<Identity>) -> ServerResponse {
     match identity {
         Some(identity) => {
             identity.logout();
-            HttpResponse::Ok().finish()
+            Ok(HttpResponse::Ok().finish())
         }
         None => {
-            HttpResponse::BadRequest()
-                .json(serde_json::json!({"status": "error", "message": "Not logged in"}))
+            Ok(HttpResponse::BadRequest()
+                .json(serde_json::json!({"status": "error", "message": "Not logged in"})))
         }
     }
 }

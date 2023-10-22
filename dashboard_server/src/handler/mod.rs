@@ -4,21 +4,18 @@ pub mod prelude {
     pub use serde_json::json;
     pub use crate::AppState;
     pub use actix_session::Session;
-    pub use super::WebResponse;
     pub use actix_identity::Identity;
+    pub use crate::error::ServerResponse;
 }
-
 use prelude::*;
 
 mod user_handler;
 
-pub type WebResponse = Result<HttpResponse, ServerError>;
-
-async fn health_check() -> impl Responder {
-    HttpResponse::Ok().json(json!({
+async fn health_check() -> ServerResponse {
+    Ok(HttpResponse::Ok().json(json!({
         "status": "success", 
         "result": "Server is up and running" 
-    }))
+    })))
 }
 
 pub fn config(conf: &mut web::ServiceConfig) {
