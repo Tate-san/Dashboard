@@ -4,38 +4,52 @@ use argon2::{self};
 use crate::schema::UserRegisterSchema;
 use crate::model::UserModel;
 
-pub async fn user_register(web::Form(form): web::Form<UserRegisterSchema>, data: web::Data<AppState>) -> ServerResponse {
+pub async fn user_register(web::Form(form): web::Form<UserRegisterSchema>, 
+                            identity: Option<Identity>,
+                            data: web::Data<AppState>) -> ServerResponse {
+
+    if let Some(_) = identity {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!({"status": "error", "message": "Cant register, already logged in"})
+        ));
+    }
+
+    if let Ok(_) = UserModel::find_by_name(&data.db, &form.username).await {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!({"status": "error", "message": "User with this name already exists"})
+        ));
+    }
 
     let salt = b"SomeRandomSalt";
-    let config = argon2::Config::default();
+    let config = argon2::Config::rfc9106_low_mem();
     let hashed_password = argon2::hash_encoded(form.password.as_bytes(), salt, &config).unwrap();
 
-    let query = 
-        sqlx::query(r#"INSERT INTO users(username,password,role_id) VALUES ($1, $2, $3)"#)
-        .bind(form.username)
-        .bind(hashed_password)
-        .bind(1)
-        .execute(&data.db)
-        .await;
+    let new_user = UserModel::new(form.username, hashed_password);
 
-    match query {
+    let result = new_user.insert(&data.db).await;
+
+    match result {
         Ok(_) => Ok(HttpResponse::Ok()
                     .json(serde_json::json!({"status": "success","data": "User successfully registered"}))),
         Err(error) => {
-            let message = error.to_string();
-            if message.contains("duplicate key"){
-                return Ok(HttpResponse::BadRequest()
-                    .json(serde_json::json!({"status": "error", "message": "User already exists with this name"})));
-            }
-            Err(error.into()) 
-        }
+                Err(error.into())
+
+        } 
     }
 
-    
 
 }
 
-pub async fn user_login(request: HttpRequest, web::Form(form): web::Form<UserRegisterSchema>, data: web::Data<AppState>) -> ServerResponse {
+pub async fn user_login(request: HttpRequest, 
+                        web::Form(form): web::Form<UserRegisterSchema>, 
+                        identity: Option<Identity>,
+                        data: web::Data<AppState>) -> ServerResponse {
+
+    if let Some(_) = identity {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!({"status": "error", "message": "Already logged in"})
+        ));
+    }
 
     if form.username.is_empty() || form.password.is_empty() {
         return Ok(HttpResponse::BadRequest().json(
@@ -43,24 +57,20 @@ pub async fn user_login(request: HttpRequest, web::Form(form): web::Form<UserReg
         ));
     }
 
-    let query = 
-        sqlx::query_as!(UserModel, r#"SELECT * from users WHERE username = $1"#, form.username)
-        .fetch_one(&data.db)
-        .await;
-
-    if let Err(error) = query {
-        match error{
-            sqlx::Error::RowNotFound => {
-                return Ok(HttpResponse::BadRequest()
-                    .json(serde_json::json!({"status": "error","message": "Invalid username or password"})));
-            }
-            _ => {
-                return Err(error.into());
+    let user = match UserModel::find_by_name(&data.db, &form.username).await {
+        Ok(user) => user,
+        Err(error) => {
+            match error {
+                DatabaseError::NotFound => {
+                    return Ok(HttpResponse::BadRequest()
+                        .json(serde_json::json!({"status": "error","message": "Invalid username or password"})));
+                }
+                _ => {
+                    return Err(error.into());
+                }
             }
         }
-    }
-
-    let user = query.unwrap();
+    };
 
     let password_valid = argon2::verify_encoded(&user.password, form.password.as_bytes())?;
 
@@ -84,6 +94,19 @@ pub async fn user_logout(identity: Option<Identity>) -> ServerResponse {
         None => {
             Ok(HttpResponse::BadRequest()
                 .json(serde_json::json!({"status": "error", "message": "Not logged in"})))
+        }
+    }
+}
+
+pub async fn user_hello(identity: Option<Identity>, 
+                        data: web::Data<AppState>) -> ServerResponse {
+    match identity {
+        Some(identity) => {
+            let user = UserModel::find_by_id(&data.db, identity.id().unwrap().parse().unwrap()).await?;
+                Ok(HttpResponse::Ok().body(format!("Hello {}!", user.username)))
+        }
+        None => {
+            Ok(HttpResponse::BadRequest().body("Hello Anonymous!"))
         }
     }
 }

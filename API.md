@@ -65,6 +65,13 @@ Fields:
     "status": "error"
 }
 ```
+**400 Bad Request**
+```json
+{
+    "message": "Already logged in",
+    "status": "error"
+}
+```
 
 
 ### Logout

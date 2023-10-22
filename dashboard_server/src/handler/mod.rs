@@ -5,7 +5,7 @@ pub mod prelude {
     pub use crate::AppState;
     pub use actix_session::Session;
     pub use actix_identity::Identity;
-    pub use crate::error::ServerResponse;
+    pub use crate::error::{ServerResponse, DatabaseError};
 }
 use prelude::*;
 
@@ -25,6 +25,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
                 .route("/login", web::post().to(user_handler::user_login))
                 .route("/register", web::post().to(user_handler::user_register))
                 .route("/logout", web::get().to(user_handler::user_logout))
+                .route("/hello", web::get().to(user_handler::user_hello))
             );
 
     conf.service(scope);

@@ -22,6 +22,7 @@ pub struct AppState {
 async fn main() -> std::io::Result<()> {
 
     dotenv().ok();
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let pool = match PgPoolOptions::new()

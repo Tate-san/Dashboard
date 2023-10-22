@@ -4,8 +4,31 @@ use actix_web::{ResponseError, http::StatusCode, HttpResponse};
 
 pub type ServerResponse = Result<HttpResponse, ServerError>;
 
+pub enum DatabaseError {
+    NotFound,
+    DuplicateKey,
+    InternalError(sqlx::Error)
+}
+
+impl From<sqlx::Error> for DatabaseError {
+    fn from(error: sqlx::Error) -> Self {
+        match error {
+            sqlx::Error::RowNotFound => DatabaseError::NotFound,
+            _ => {
+                let message = error.to_string();
+                if message.contains("duplicate key") {
+                    return Self::DuplicateKey;
+                }
+
+                Self::InternalError(error)
+            } 
+        }
+        
+    }
+}
+
 #[derive(Debug)]
-pub enum ServerErrorType{
+pub enum ServerErrorType {
     IoError,
     SqlxError,
     ArgonError,
@@ -14,7 +37,7 @@ pub enum ServerErrorType{
 #[derive(Debug)]
 pub struct ServerError {
     pub message: Option<String>,
-    pub err_type: ServerErrorType,
+    pub error: ServerErrorType,
 }
 
 impl ServerError {
@@ -36,7 +59,7 @@ impl From<io::Error> for ServerError {
     fn from(error: io::Error) -> Self {
         Self {
             message: Some(error.to_string()),
-            err_type: ServerErrorType::SqlxError
+            error: ServerErrorType::SqlxError
         }
     }
 }
@@ -45,7 +68,7 @@ impl From<sqlx::Error> for ServerError {
     fn from(error: sqlx::Error) -> Self {
         Self {
             message: Some(error.to_string()),
-            err_type: ServerErrorType::IoError
+            error: ServerErrorType::IoError
         }
     }
 }
@@ -54,14 +77,29 @@ impl From<argon2::Error> for ServerError {
     fn from(error: argon2::Error) -> Self {
         Self {
             message: Some(error.to_string()),
-            err_type: ServerErrorType::IoError
+            error: ServerErrorType::IoError
+        }
+    }
+}
+
+impl From<DatabaseError> for ServerError {
+    fn from(error: DatabaseError) -> Self {
+        let message = match error {
+            DatabaseError::DuplicateKey => "Duplicate key".to_string(),
+            DatabaseError::NotFound => "Not found".to_string(),
+            DatabaseError::InternalError(err) => err.to_string(),
+        };
+
+        Self {
+            message: Some(message),
+            error: ServerErrorType::SqlxError
         }
     }
 }
 
 impl ResponseError for ServerError {
     fn status_code(&self) -> StatusCode {
-        match self.err_type {
+        match self.error {
             ServerErrorType::IoError => StatusCode::INTERNAL_SERVER_ERROR,
             ServerErrorType::SqlxError => StatusCode::INTERNAL_SERVER_ERROR,
             ServerErrorType::ArgonError => StatusCode::INTERNAL_SERVER_ERROR,
