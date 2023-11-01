@@ -2,6 +2,7 @@
 
 # Table of content
 1. [API](API.md)
+2. [Server](dashboard_server/README.md)
 
 
 # Frontend
