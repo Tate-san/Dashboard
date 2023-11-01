@@ -31,7 +31,7 @@ async fn main() -> std::io::Result<()> {
         .await
     {
         Ok(pool) => {
-            println!("✅Connection to the database is successful!");
+            println!("✅ Connection to the database is successful!");
             pool
         }
         Err(err) => {
@@ -41,8 +41,14 @@ async fn main() -> std::io::Result<()> {
     };
 
     let session_key = Key::generate();
+    let server_address = std::env::var("SERVER_ADDRESS").expect("Server address not set");
+    let server_port = std::env::var("SERVER_PORT").expect("Server port not set");
 
     println!("🚀 Server started successfully!");
+    println!("📡 Listening on {}:{}", 
+        &server_address,
+        &server_port 
+    );
 
     HttpServer::new(move || {
         let cors = Cors::default()
@@ -73,7 +79,7 @@ async fn main() -> std::io::Result<()> {
             )
             .wrap(IdentityMiddleware::default())
     })
-    .bind("127.0.0.1:8080")?
+    .bind(format!("{}:{}", server_address, server_port))?
     .run()
     .await
 }

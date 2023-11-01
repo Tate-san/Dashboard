@@ -1,10 +1,3 @@
-
-ALTER TABLE users
-    ADD CONSTRAINT fk_role_id
-        FOREIGN KEY(role_id) 
-        REFERENCES roles(role_id);
-
-
 ALTER TABLE systems
     ADD CONSTRAINT fk_owner_id
         FOREIGN KEY(owner_id) 
