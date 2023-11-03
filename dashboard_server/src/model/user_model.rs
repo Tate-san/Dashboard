@@ -1,13 +1,17 @@
-use sqlx::postgres::PgQueryResult;
-
 use super::prelude::*;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum RoleModel{
+    User = 1,
+    Admin
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UserModel{
     pub user_id: i32,
     pub username: String,
     pub password: String,
-    pub role_id: Option<i32>,
+    pub role: Option<i32>,
 }
 
 impl UserModel{
@@ -17,7 +21,7 @@ impl UserModel{
             user_id: 0, 
             username, 
             password, 
-            role_id: None ,
+            role: None,
         }
     }
 
@@ -36,10 +40,10 @@ impl UserModel{
     }
 
     pub async fn insert(&self, conn: &sqlx::Pool<Postgres>) -> DatabaseResult<PgQueryResult> {
-        sqlx::query(r#"INSERT INTO users(username,password,role_id) VALUES ($1, $2, $3)"#)
+        sqlx::query(r#"INSERT INTO users(username,password,role) VALUES ($1, $2, $3)"#)
             .bind(&self.username)
             .bind(&self.password)
-            .bind(1)
+            .bind(RoleModel::User as i32)
             .execute(conn)
             .await
             .map_err(|err| err.into())

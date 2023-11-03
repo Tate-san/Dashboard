@@ -6,10 +6,13 @@ pub mod prelude {
     pub use actix_session::Session;
     pub use actix_identity::Identity;
     pub use crate::error::{ServerResponse, DatabaseError};
+    pub use serde::{Deserialize, Serialize};
 }
 use prelude::*;
 
 mod user_handler;
+mod device_handler;
+mod system_handler;
 
 async fn health_check() -> ServerResponse {
     Ok(HttpResponse::Ok().json(json!({
@@ -26,7 +29,16 @@ pub fn config(conf: &mut web::ServiceConfig) {
                 .route("/register", web::post().to(user_handler::user_register))
                 .route("/logout", web::get().to(user_handler::user_logout))
                 .route("/hello", web::get().to(user_handler::user_hello))
+                .route("/roles", web::get().to(user_handler::list_roles))
+            )
+            .service(web::scope("/device")
+                .route("/new", web::post().to(device_handler::device_new))
+            )
+            .service(web::scope("/system")
+                .route("/new", web::post().to(system_handler::system_new))
+                .route("/delete/{system_id}", web::delete().to(system_handler::system_delete))
             );
+            
 
     conf.service(scope);
 }

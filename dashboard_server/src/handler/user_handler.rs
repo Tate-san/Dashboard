@@ -1,8 +1,10 @@
 use super::prelude::*;
 use actix_web::{HttpRequest, HttpMessage};
 use argon2::{self};
-use crate::schema::UserRegisterSchema;
-use crate::model::UserModel;
+use crate::{
+    schema::user_schema::UserRegisterSchema,
+    model::UserModel
+};
 
 pub async fn user_register(web::Form(form): web::Form<UserRegisterSchema>, 
                             identity: Option<Identity>,
@@ -109,4 +111,22 @@ pub async fn user_hello(identity: Option<Identity>,
             Ok(HttpResponse::BadRequest().body("Hello Anonymous!"))
         }
     }
+}
+
+pub async fn list_roles() -> ServerResponse {
+    Ok(HttpResponse::Ok().json(json!(
+        {
+            "status": "success",
+            "data": [
+                {
+                    "id": 1,
+                    "role": "user"
+                },
+                {
+                    "id": 2,
+                    "role": "admin"
+                }
+            ]
+        }
+    )))
 }

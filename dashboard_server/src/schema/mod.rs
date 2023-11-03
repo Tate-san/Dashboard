@@ -1,13 +1,7 @@
-use serde::{Deserialize, Serialize};
+pub mod user_schema;
+pub mod system_schema;
+pub mod device_schema;
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct UserRegisterSchema{
-    pub username: String,
-    pub password: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct UserLoginSchema{
-    pub username: String,
-    pub password: String,
+pub mod prelude {
+    pub use serde::{Deserialize, Serialize};
 }

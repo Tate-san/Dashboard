@@ -6,5 +6,5 @@ CREATE TABLE
         device_id INTEGER NOT NULL,
         real_name VARCHAR(255) NOT NULL,
         alias_name VARCHAR(255) NOT NULL,
-        type VARCHAR(255) NOT NULL
+        data_type VARCHAR(255) NOT NULL
     );
