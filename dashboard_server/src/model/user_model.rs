@@ -14,6 +14,12 @@ pub struct UserModel{
     pub role: Option<i32>,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct UserListModel{
+    pub user_id: i32,
+    pub username: String,
+}
+
 impl UserModel{
 
     pub fn new(username: String, password: String) -> Self {
@@ -35,6 +41,13 @@ impl UserModel{
     pub async fn find_by_id(conn: &sqlx::Pool<Postgres>, id: i32) -> DatabaseResult<UserModel> {
         sqlx::query_as!(UserModel, r#"SELECT * from users WHERE user_id = $1"#, id)
             .fetch_one(conn)
+            .await
+            .map_err(|err| err.into())
+    }
+
+    pub async fn list(conn: &sqlx::Pool<Postgres>) -> DatabaseResult<Vec<UserListModel>> {
+        sqlx::query_as!(UserListModel, r#"SELECT user_id,username from users"#)
+            .fetch_all(conn)
             .await
             .map_err(|err| err.into())
     }

@@ -3,7 +3,7 @@ use actix_web::{HttpRequest, HttpMessage};
 use argon2::{self};
 use crate::{
     schema::user_schema::UserRegisterSchema,
-    model::UserModel
+    model::{UserModel, UserListModel}
 };
 
 pub async fn user_register(web::Form(form): web::Form<UserRegisterSchema>, 
@@ -86,6 +86,11 @@ pub async fn user_login(request: HttpRequest,
 
 }
 
+pub async fn user_list(data: web::Data<AppState>,
+                        identity: Identity) -> ServerResponse {
+    let users = UserModel::list(&data.db).await?; 
+    Ok(HttpResponse::Ok().json(users))
+}
 
 pub async fn user_logout(identity: Option<Identity>) -> ServerResponse {
     match identity {

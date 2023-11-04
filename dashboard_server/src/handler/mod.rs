@@ -28,6 +28,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
                 .route("/login", web::post().to(user_handler::user_login))
                 .route("/register", web::post().to(user_handler::user_register))
                 .route("/logout", web::get().to(user_handler::user_logout))
+                .route("/list", web::get().to(user_handler::user_list))
                 .route("/hello", web::get().to(user_handler::user_hello))
                 .route("/roles", web::get().to(user_handler::list_roles))
             )

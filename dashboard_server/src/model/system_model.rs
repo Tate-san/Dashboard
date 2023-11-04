@@ -1,5 +1,13 @@
 use super::prelude::*;
 
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SystemAccessModel{
+    pub systemaccess_id: i32,
+    pub user_id: i32,
+    pub system_id: i32,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SystemModel{
     pub system_id: i32,
@@ -49,4 +57,31 @@ impl SystemModel {
             .await
             .map_err(|err| err.into())
     }
+}
+
+impl SystemAccessModel {
+    pub fn new(system_id: i32, user_id: i32) -> Self {
+        SystemAccessModel{
+            systemaccess_id: 0,
+            system_id,
+            user_id
+        }
+    }
+
+    pub async fn insert(&self, conn: &sqlx::Pool<Postgres>) -> DatabaseResult<PgQueryResult> {
+        sqlx::query(r#"INSERT INTO systemaccess(user_id, system_id) VALUES ($1, $2)"#)
+            .bind(&self.user_id)
+            .bind(&self.system_id)
+            .execute(conn)
+            .await
+            .map_err(|err| err.into())
+    }
+
+    pub async fn find_by_user_id_system_id(conn: &sqlx::Pool<Postgres>, user_id: i32, system_id: i32) -> DatabaseResult<SystemAccessModel> {
+        sqlx::query_as!(SystemAccessModel, r#"SELECT * from systemaccess WHERE user_id = $1 AND system_id = $2"#, user_id, system_id)
+            .fetch_one(conn)
+            .await
+            .map_err(|err| err.into())
+    }
+
 }
