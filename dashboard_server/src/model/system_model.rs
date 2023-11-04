@@ -77,6 +77,15 @@ impl SystemAccessModel {
             .map_err(|err| err.into())
     }
 
+    pub async fn delete(&self, conn: &sqlx::Pool<Postgres>) -> DatabaseResult<PgQueryResult> {
+        sqlx::query(r#"DELETE FROM systemaccess WHERE user_id = $1 AND system_id = $2"#)
+            .bind(&self.user_id)
+            .bind(&self.system_id)
+            .execute(conn)
+            .await
+            .map_err(|err| err.into())
+    }
+
     pub async fn find_by_user_id_system_id(conn: &sqlx::Pool<Postgres>, user_id: i32, system_id: i32) -> DatabaseResult<SystemAccessModel> {
         sqlx::query_as!(SystemAccessModel, r#"SELECT * from systemaccess WHERE user_id = $1 AND system_id = $2"#, user_id, system_id)
             .fetch_one(conn)

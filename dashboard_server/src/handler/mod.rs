@@ -38,6 +38,8 @@ pub fn config(conf: &mut web::ServiceConfig) {
             .service(web::scope("/system")
                 .route("/new", web::post().to(system_handler::system_new))
                 .route("/delete/{system_id}", web::delete().to(system_handler::system_delete))
+                .route("/user", web::post().to(system_handler::system_add_user))
+                .route("/user", web::delete().to(system_handler::system_delete_user))
             );
             
 

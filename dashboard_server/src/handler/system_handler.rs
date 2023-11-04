@@ -1,6 +1,6 @@
 use crate::{
-    schema::system_schema::SystemNewSchema, 
-    model::SystemModel
+    schema::system_schema::{SystemNewSchema, SystemAddUserSchema, SystemDeleteUserSchema}, 
+    model::{SystemModel, SystemAccessModel}
 };
 use super::prelude::*;
 
@@ -72,10 +72,59 @@ pub async fn system_delete(query: web::Path<DeleteQuery>,
 
 }
 
-/*
-pub async fn system_add_user(, 
+
+pub async fn system_add_user(body: web::Json<SystemAddUserSchema>, 
                         identity: Identity,
                         data: web::Data<AppState>) -> ServerResponse {
 
+    let user_id: i32 = identity.id().unwrap().parse().unwrap();
+
+    let system = match SystemModel::find_by_id(&data.db, body.system_id).await {
+        Ok(system) => system,
+        Err(_) => return Ok(HttpResponse::BadRequest().json(
+                    serde_json::json!({"status": "error", "message": "System doesn't exist"})))
+    };
+
+    if let Ok(_) = SystemAccessModel::find_by_user_id_system_id(&data.db, body.user_id, body.system_id).await {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!({"status": "error", "message": "User is already member of the system"})));
+    }
+
+    if system.owner_id != user_id {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!({"status": "error", "message": "You are not the owner of the system"})));
+    }
+
+    let new_access = SystemAccessModel::new(body.system_id, body.user_id);
+    new_access.insert(&data.db).await?;
+
+    Ok(HttpResponse::Ok().finish())
 }
-*/
+
+pub async fn system_delete_user(body: web::Json<SystemDeleteUserSchema>, 
+                        identity: Identity,
+                        data: web::Data<AppState>) -> ServerResponse {
+
+    let user_id: i32 = identity.id().unwrap().parse().unwrap();
+
+    let system = match SystemModel::find_by_id(&data.db, body.system_id).await {
+        Ok(system) => system,
+        Err(_) => return Ok(HttpResponse::BadRequest().json(
+                    serde_json::json!({"status": "error", "message": "System doesn't exist"})))
+    };
+
+    if let Err(_) = SystemAccessModel::find_by_user_id_system_id(&data.db, body.user_id, body.system_id).await {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!({"status": "error", "message": "User is not a member of the system"})));
+    }
+
+    if system.owner_id != user_id {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!({"status": "error", "message": "You are not the owner of the system"})));
+    }
+
+    let delete_access = SystemAccessModel::new(body.system_id, body.user_id);
+    delete_access.delete(&data.db).await?;
+
+    Ok(HttpResponse::Ok().finish())
+}
