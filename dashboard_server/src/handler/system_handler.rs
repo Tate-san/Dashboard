@@ -95,6 +95,11 @@ pub async fn system_add_user(body: web::Json<SystemAddUserSchema>,
             serde_json::json!({"status": "error", "message": "You are not the owner of the system"})));
     }
 
+    if system.owner_id == body.user_id {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!({"status": "error", "message": "Cannot add access to owner, who already has full access"})));
+    }
+
     let new_access = SystemAccessModel::new(body.system_id, body.user_id);
     new_access.insert(&data.db).await?;
 
@@ -121,6 +126,11 @@ pub async fn system_delete_user(body: web::Json<SystemDeleteUserSchema>,
     if system.owner_id != user_id {
         return Ok(HttpResponse::BadRequest().json(
             serde_json::json!({"status": "error", "message": "You are not the owner of the system"})));
+    }
+
+    if system.owner_id == body.user_id {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!({"status": "error", "message": "Cannot add access to owner, who already has full access"})));
     }
 
     let delete_access = SystemAccessModel::new(body.system_id, body.user_id);

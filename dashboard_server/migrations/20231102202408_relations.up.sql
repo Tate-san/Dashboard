@@ -12,7 +12,8 @@ ALTER TABLE systemaccess
 ALTER TABLE systemaccess
     ADD CONSTRAINT fk_system_id
         FOREIGN KEY(system_id) 
-        REFERENCES systems(system_id);
+        REFERENCES systems(system_id)
+        ON DELETE CASCADE;
 
 ALTER TABLE devicestructure 
     ADD CONSTRAINT fk_device_id
