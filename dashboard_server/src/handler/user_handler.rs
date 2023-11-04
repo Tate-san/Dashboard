@@ -2,11 +2,11 @@ use super::prelude::*;
 use actix_web::{HttpRequest, HttpMessage};
 use argon2::{self};
 use crate::{
-    schema::user_schema::UserRegisterSchema,
+    schema::user_schema::{UserRegisterSchema, UserLoginSchema},
     model::{UserModel, UserListModel}
 };
 
-pub async fn user_register(web::Form(form): web::Form<UserRegisterSchema>, 
+pub async fn user_register(body: web::Json<UserRegisterSchema>, 
                             identity: Option<Identity>,
                             data: web::Data<AppState>) -> ServerResponse {
 
@@ -16,7 +16,7 @@ pub async fn user_register(web::Form(form): web::Form<UserRegisterSchema>,
         ));
     }
 
-    if let Ok(_) = UserModel::find_by_name(&data.db, &form.username).await {
+    if let Ok(_) = UserModel::find_by_name(&data.db, &body.username).await {
         return Ok(HttpResponse::BadRequest().json(
             serde_json::json!({"status": "error", "message": "User with this name already exists"})
         ));
@@ -24,9 +24,9 @@ pub async fn user_register(web::Form(form): web::Form<UserRegisterSchema>,
 
     let salt = b"SomeRandomSalt";
     let config = argon2::Config::rfc9106_low_mem();
-    let hashed_password = argon2::hash_encoded(form.password.as_bytes(), salt, &config).unwrap();
+    let hashed_password = argon2::hash_encoded(body.password.as_bytes(), salt, &config).unwrap();
 
-    let new_user = UserModel::new(form.username, hashed_password);
+    let new_user = UserModel::new(body.username.clone(), hashed_password);
 
     let result = new_user.insert(&data.db).await;
 
@@ -43,7 +43,7 @@ pub async fn user_register(web::Form(form): web::Form<UserRegisterSchema>,
 }
 
 pub async fn user_login(request: HttpRequest, 
-                        web::Form(form): web::Form<UserRegisterSchema>, 
+                        body: web::Json<UserLoginSchema>, 
                         identity: Option<Identity>,
                         data: web::Data<AppState>) -> ServerResponse {
 
@@ -53,13 +53,13 @@ pub async fn user_login(request: HttpRequest,
         ));
     }
 
-    if form.username.is_empty() || form.password.is_empty() {
+    if body.username.is_empty() || body.password.is_empty() {
         return Ok(HttpResponse::BadRequest().json(
             serde_json::json!({"status": "error", "message": "Missing username or password"})
         ));
     }
 
-    let user = match UserModel::find_by_name(&data.db, &form.username).await {
+    let user = match UserModel::find_by_name(&data.db, &body.username).await {
         Ok(user) => user,
         Err(error) => {
             match error {
@@ -74,7 +74,7 @@ pub async fn user_login(request: HttpRequest,
         }
     };
 
-    let password_valid = argon2::verify_encoded(&user.password, form.password.as_bytes())?;
+    let password_valid = argon2::verify_encoded(&user.password, body.password.as_bytes())?;
 
     if password_valid {
         Identity::login(&request.extensions(), user.user_id.to_string()).unwrap(); 
@@ -87,7 +87,7 @@ pub async fn user_login(request: HttpRequest,
 }
 
 pub async fn user_list(data: web::Data<AppState>,
-                        identity: Identity) -> ServerResponse {
+                        _: Identity) -> ServerResponse {
     let users = UserModel::list(&data.db).await?; 
     Ok(HttpResponse::Ok().json(users))
 }

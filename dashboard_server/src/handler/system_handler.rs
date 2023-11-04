@@ -9,14 +9,14 @@ pub struct DeleteQuery {
     pub system_id: i32,
 }
 
-pub async fn system_new(web::Form(form): web::Form<SystemNewSchema>, 
+pub async fn system_new(body: web::Json<SystemNewSchema>, 
                         identity: Identity,
                         data: web::Data<AppState>) -> ServerResponse {
 
     let owner_id: i32 = identity.id().unwrap().parse().unwrap();
 
     if let Ok(_) = SystemModel::find_by_name_and_user_id(&data.db, 
-                                                        form.name.clone(),
+                                                        body.name.clone(),
                                                         owner_id
                                                         ).await {
         return Ok(HttpResponse::BadRequest().json(
@@ -24,8 +24,8 @@ pub async fn system_new(web::Form(form): web::Form<SystemNewSchema>,
         ));
     }
 
-    let new_system = SystemModel:: new(form.name, 
-                                                    form.description, 
+    let new_system = SystemModel:: new(body.name.clone(), 
+                                                    body.description.clone(), 
                                                     owner_id 
                                                 );
                     
@@ -71,3 +71,11 @@ pub async fn system_delete(query: web::Path<DeleteQuery>,
     }
 
 }
+
+/*
+pub async fn system_add_user(, 
+                        identity: Identity,
+                        data: web::Data<AppState>) -> ServerResponse {
+
+}
+*/
