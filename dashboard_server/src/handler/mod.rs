@@ -7,17 +7,18 @@ pub mod prelude {
     pub use actix_identity::Identity;
     pub use crate::error::{ServerResponse, DatabaseError};
     pub use serde::{Deserialize, Serialize};
+    pub use utoipa::OpenApi;
+    pub use crate::model::{ErrorModel, ResponseError};
 }
 use prelude::*;
 
-mod user_handler;
-mod device_handler;
-mod system_handler;
+pub mod user_handler;
+pub mod device_handler;
+pub mod system_handler;
 
 async fn health_check() -> ServerResponse {
     Ok(HttpResponse::Ok().json(json!({
-        "status": "success", 
-        "result": "Server is up and running" 
+        "message": "Server is up and running" 
     })))
 }
 

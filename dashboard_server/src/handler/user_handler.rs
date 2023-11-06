@@ -3,23 +3,30 @@ use actix_web::{HttpRequest, HttpMessage};
 use argon2::{self};
 use crate::{
     schema::user_schema::{UserRegisterSchema, UserLoginSchema},
-    model::{UserModel, UserListModel}
+    model::{UserModel, UserListModel, RoleListModel}
 };
 
+#[utoipa::path(
+    post,
+    path = "/api/user/register",
+    request_body = UserRegisterSchema,
+    responses(
+        (status = 200),
+        (status = 400),
+    )
+)]
 pub async fn user_register(body: web::Json<UserRegisterSchema>, 
                             identity: Option<Identity>,
                             data: web::Data<AppState>) -> ServerResponse {
 
     if let Some(_) = identity {
-        return Ok(HttpResponse::BadRequest().json(
-            serde_json::json!({"status": "error", "message": "Cant register, already logged in"})
-        ));
+        return Ok(HttpResponse::BadRequest()
+                    .json(serde_json::json!(ResponseError::UserLoggedIn.get_error())));
     }
 
     if let Ok(_) = UserModel::find_by_name(&data.db, &body.username).await {
-        return Ok(HttpResponse::BadRequest().json(
-            serde_json::json!({"status": "error", "message": "User with this name already exists"})
-        ));
+        return Ok(HttpResponse::BadRequest()
+                    .json(serde_json::json!(ResponseError::UserAlreadyExists.get_error())));
     }
 
     let salt = b"SomeRandomSalt";
@@ -31,8 +38,7 @@ pub async fn user_register(body: web::Json<UserRegisterSchema>,
     let result = new_user.insert(&data.db).await;
 
     match result {
-        Ok(_) => Ok(HttpResponse::Ok()
-                    .json(serde_json::json!({"status": "success","data": "User successfully registered"}))),
+        Ok(_) => Ok(HttpResponse::Ok().finish()),
         Err(error) => {
                 Err(error.into())
 
@@ -42,21 +48,28 @@ pub async fn user_register(body: web::Json<UserRegisterSchema>,
 
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/user/login",
+    request_body = UserLoginSchema,
+    responses(
+        (status = 200),
+        (status = 400),
+    )
+)]
 pub async fn user_login(request: HttpRequest, 
                         body: web::Json<UserLoginSchema>, 
                         identity: Option<Identity>,
                         data: web::Data<AppState>) -> ServerResponse {
 
     if let Some(_) = identity {
-        return Ok(HttpResponse::BadRequest().json(
-            serde_json::json!({"status": "error", "message": "Already logged in"})
-        ));
+        return Ok(HttpResponse::BadRequest()
+                    .json(serde_json::json!(ResponseError::UserLoggedIn.get_error())));
     }
 
     if body.username.is_empty() || body.password.is_empty() {
-        return Ok(HttpResponse::BadRequest().json(
-            serde_json::json!({"status": "error", "message": "Missing username or password"})
-        ));
+        return Ok(HttpResponse::BadRequest()
+                    .json(serde_json::json!(ResponseError::UserLoginInvalid.get_error())));
     }
 
     let user = match UserModel::find_by_name(&data.db, &body.username).await {
@@ -65,7 +78,8 @@ pub async fn user_login(request: HttpRequest,
             match error {
                 DatabaseError::NotFound => {
                     return Ok(HttpResponse::BadRequest()
-                        .json(serde_json::json!({"status": "error","message": "Invalid username or password"})));
+                                .json(serde_json::json!(ResponseError::UserLoginInvalid.get_error())));
+            
                 }
                 _ => {
                     return Err(error.into());
@@ -82,29 +96,45 @@ pub async fn user_login(request: HttpRequest,
     }
 
     return Ok(HttpResponse::BadRequest()
-        .json(serde_json::json!({"status": "error", "message": "Invalid username or password"})));
+                .json(serde_json::json!(ResponseError::UserLoginInvalid.get_error())));
 
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/user/list",
+    responses(
+        (status = 200, body = Vec<UserListModel>),
+        (status = 401, body = ErrorModel),
+    )
+)]
 pub async fn user_list(data: web::Data<AppState>,
                         _: Identity) -> ServerResponse {
     let users = UserModel::list(&data.db).await?; 
     Ok(HttpResponse::Ok().json(users))
 }
 
-pub async fn user_logout(identity: Option<Identity>) -> ServerResponse {
-    match identity {
-        Some(identity) => {
-            identity.logout();
-            Ok(HttpResponse::Ok().finish())
-        }
-        None => {
-            Ok(HttpResponse::BadRequest()
-                .json(serde_json::json!({"status": "error", "message": "Not logged in"})))
-        }
-    }
+#[utoipa::path(
+    get,
+    path = "/api/user/logout",
+    responses(
+        (status = 200),
+        (status = 400),
+    )
+)]
+pub async fn user_logout(identity: Identity) -> ServerResponse {
+    identity.logout();
+    Ok(HttpResponse::Ok().finish())
 }
 
+
+#[utoipa::path(
+    get,
+    path = "/api/user/hello",
+    responses(
+        (status = 200),
+    )
+)]
 pub async fn user_hello(identity: Option<Identity>, 
                         data: web::Data<AppState>) -> ServerResponse {
     match identity {
@@ -118,20 +148,24 @@ pub async fn user_hello(identity: Option<Identity>,
     }
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/user/roles",
+    responses(
+        (status = 200, body = Vec<RoleListModel>),
+    )
+)]
 pub async fn list_roles() -> ServerResponse {
-    Ok(HttpResponse::Ok().json(json!(
-        {
-            "status": "success",
-            "data": [
-                {
-                    "id": 1,
-                    "role": "user"
-                },
-                {
-                    "id": 2,
-                    "role": "admin"
-                }
-            ]
-        }
-    )))
+    Ok(HttpResponse::Ok().json(
+        vec![
+            RoleListModel{
+                id: 1,
+                name: "user".to_string()
+            },
+            RoleListModel{
+                id: 2,
+                name: "admin".to_string()
+            },
+        ]
+    ))
 }

@@ -1,6 +1,7 @@
 use std::io;
 
 use actix_web::{ResponseError, http::StatusCode, HttpResponse};
+use crate::model::ResponseError as LocalResponseError;
 
 pub type ServerResponse = Result<HttpResponse, ServerError>;
 
@@ -107,9 +108,6 @@ impl ResponseError for ServerError {
     }
     fn error_response(&self) -> HttpResponse { 
         HttpResponse::build(self.status_code())
-            .json(serde_json::json!({
-                "status": "error",
-                "message": format!("{:?}", self.message())
-            }))
+            .json(LocalResponseError::InternalError(self.message()).get_error())
     }
 }

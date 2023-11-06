@@ -9,6 +9,16 @@ pub struct DeleteQuery {
     pub system_id: i32,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/system/new",
+    request_body = SystemNewSchema,
+    responses(
+        (status = 200),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    )
+)]
 pub async fn system_new(body: web::Json<SystemNewSchema>, 
                         identity: Identity,
                         data: web::Data<AppState>) -> ServerResponse {
@@ -20,7 +30,7 @@ pub async fn system_new(body: web::Json<SystemNewSchema>,
                                                         owner_id
                                                         ).await {
         return Ok(HttpResponse::BadRequest().json(
-            serde_json::json!({"status": "error", "message": "System with this name already exists"})
+            serde_json::json!(ResponseError::SystemAlreadyExists.get_error())
         ));
     }
 
@@ -32,13 +42,24 @@ pub async fn system_new(body: web::Json<SystemNewSchema>,
     let response = new_system.insert(&data.db).await;
 
     match response {
-        Ok(_) => Ok(HttpResponse::Ok()
-                    .json(serde_json::json!({"status": "success","data": "System successfully added"}))),
+        Ok(_) => Ok(HttpResponse::Ok().finish()),
         Err(error) => Err(error.into())
     }
 
 }
 
+#[utoipa::path(
+    delete,
+    path = "/api/system/delete/{system_id}",
+    responses(
+        (status = 200),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    ),
+    params(
+            ("system_id" = i32, Path, description = ""),
+        )
+)]
 pub async fn system_delete(query: web::Path<DeleteQuery>, 
                         identity: Identity,
                         data: web::Data<AppState>) -> ServerResponse {
@@ -53,26 +74,34 @@ pub async fn system_delete(query: web::Path<DeleteQuery>,
         Ok(system) => {
             if system.owner_id != user_id {
                 return Ok(HttpResponse::BadRequest().json(
-                    serde_json::json!({"status": "error", "message": "You are not the owner of the system"})));
+                    serde_json::json!(ResponseError::SystemNotOwner.get_error())));
             }
         }
         Err(_) => {
             return Ok(HttpResponse::BadRequest().json(
-                serde_json::json!({"status": "error", "message": "System doesn't exist"})));
+                    serde_json::json!(ResponseError::SystemDoesntExist.get_error())));
         }
     }
 
     let response = SystemModel::delete(&data.db, query.system_id).await;
 
     match response {
-        Ok(_) => Ok(HttpResponse::Ok()
-                    .json(serde_json::json!({"status": "success","data": "System successfully deleted"}))),
+        Ok(_) => Ok(HttpResponse::Ok().finish()),
         Err(error) => Err(error.into())
     }
 
 }
 
-
+#[utoipa::path(
+    post,
+    path = "/api/system/user",
+    request_body = SystemAddUserSchema,
+    responses(
+        (status = 200),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    )
+)]
 pub async fn system_add_user(body: web::Json<SystemAddUserSchema>, 
                         identity: Identity,
                         data: web::Data<AppState>) -> ServerResponse {
@@ -82,22 +111,22 @@ pub async fn system_add_user(body: web::Json<SystemAddUserSchema>,
     let system = match SystemModel::find_by_id(&data.db, body.system_id).await {
         Ok(system) => system,
         Err(_) => return Ok(HttpResponse::BadRequest().json(
-                    serde_json::json!({"status": "error", "message": "System doesn't exist"})))
+                    serde_json::json!(ResponseError::SystemDoesntExist.get_error())))
     };
 
     if let Ok(_) = SystemAccessModel::find_by_user_id_system_id(&data.db, body.user_id, body.system_id).await {
         return Ok(HttpResponse::BadRequest().json(
-            serde_json::json!({"status": "error", "message": "User is already member of the system"})));
+            serde_json::json!(ResponseError::SystemAlreadyMember.get_error())))
     }
 
     if system.owner_id != user_id {
         return Ok(HttpResponse::BadRequest().json(
-            serde_json::json!({"status": "error", "message": "You are not the owner of the system"})));
+            serde_json::json!(ResponseError::SystemNotOwner.get_error())));
     }
 
     if system.owner_id == body.user_id {
         return Ok(HttpResponse::BadRequest().json(
-            serde_json::json!({"status": "error", "message": "Cannot add access to owner, who already has full access"})));
+            serde_json::json!(ResponseError::SystemAlreadyOwner.get_error())));
     }
 
     let new_access = SystemAccessModel::new(body.system_id, body.user_id);
@@ -106,6 +135,16 @@ pub async fn system_add_user(body: web::Json<SystemAddUserSchema>,
     Ok(HttpResponse::Ok().finish())
 }
 
+#[utoipa::path(
+    delete,
+    path = "/api/system/user",
+    request_body = SystemDeleteUserSchema,
+    responses(
+        (status = 200),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    )
+)]
 pub async fn system_delete_user(body: web::Json<SystemDeleteUserSchema>, 
                         identity: Identity,
                         data: web::Data<AppState>) -> ServerResponse {
@@ -115,22 +154,22 @@ pub async fn system_delete_user(body: web::Json<SystemDeleteUserSchema>,
     let system = match SystemModel::find_by_id(&data.db, body.system_id).await {
         Ok(system) => system,
         Err(_) => return Ok(HttpResponse::BadRequest().json(
-                    serde_json::json!({"status": "error", "message": "System doesn't exist"})))
+            serde_json::json!(ResponseError::SystemDoesntExist.get_error())))
     };
 
     if let Err(_) = SystemAccessModel::find_by_user_id_system_id(&data.db, body.user_id, body.system_id).await {
         return Ok(HttpResponse::BadRequest().json(
-            serde_json::json!({"status": "error", "message": "User is not a member of the system"})));
+            serde_json::json!(ResponseError::SystemAlreadyMember.get_error())))
     }
 
     if system.owner_id != user_id {
         return Ok(HttpResponse::BadRequest().json(
-            serde_json::json!({"status": "error", "message": "You are not the owner of the system"})));
+            serde_json::json!(ResponseError::SystemNotOwner.get_error())));
     }
 
     if system.owner_id == body.user_id {
         return Ok(HttpResponse::BadRequest().json(
-            serde_json::json!({"status": "error", "message": "Cannot add access to owner, who already has full access"})));
+            serde_json::json!(ResponseError::SystemAlreadyOwner.get_error())));
     }
 
     let delete_access = SystemAccessModel::new(body.system_id, body.user_id);

@@ -8,6 +8,8 @@ use actix_identity::{Identity, IdentityMiddleware};
 use actix_web::cookie::Key;
 use dotenv::dotenv;
 use sqlx::postgres::{PgPool, PgPoolOptions};
+use utoipa::OpenApi;
+use utoipa_swagger_ui::{SwaggerUi, Url};
 
 mod error;
 mod handler;
@@ -40,6 +42,37 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
+    
+    #[derive(OpenApi)]
+    #[openapi(
+        paths(
+            handler::user_handler::user_register,
+            handler::user_handler::user_login,
+            handler::user_handler::user_logout,
+            handler::user_handler::user_list,
+            handler::user_handler::list_roles,
+            handler::system_handler::system_new,
+            handler::system_handler::system_delete,
+            handler::system_handler::system_add_user,
+            handler::system_handler::system_delete_user,
+            handler::device_handler::device_new,
+        ), 
+        components(
+            schemas(
+                schema::user_schema::UserRegisterSchema,
+                schema::user_schema::UserLoginSchema,
+                model::user_model::UserListModel,
+                model::user_model::RoleListModel,
+                schema::system_schema::SystemNewSchema,
+                schema::system_schema::SystemAddUserSchema,
+                schema::system_schema::SystemDeleteUserSchema,
+                schema::device_schema::DeviceNewSchema,
+                model::ErrorModel,
+            )
+        )
+    )]
+    struct ApiDoc;
+
     let session_key = Key::generate();
     let server_address = std::env::var("SERVER_ADDRESS").expect("Server address not set");
     let server_port = std::env::var("SERVER_PORT").expect("Server port not set");
@@ -52,6 +85,8 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         let cors = Cors::default()
+            .allowed_origin("http://127.0.0.1:8080")
+            .allowed_origin("http://localhost:8080")
             .allowed_origin("http://127.0.0.1:3000")
             .allowed_methods(["GET", "POST", "PATCH", "DELETE"])
             .allowed_headers(vec![
@@ -69,6 +104,12 @@ async fn main() -> std::io::Result<()> {
                     })
             )
             .configure(handler::config)
+            .service(SwaggerUi::new("/swagger-ui/{_:.*}").urls(vec![
+                (
+                    Url::new("api1", "/api-docs/openapi1.json"),
+                    ApiDoc::openapi(),
+                )
+            ]))
             .wrap(cors)
             .wrap(Logger::default())
             .wrap(

@@ -1,12 +1,18 @@
 use super::prelude::*;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, ToSchema, Debug)]
+pub struct RoleListModel{
+    pub id: i32,
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Debug)]
 pub enum RoleModel{
     User = 1,
     Admin
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, ToSchema, Debug)]
 pub struct UserModel{
     pub user_id: i32,
     pub username: String,
@@ -14,7 +20,7 @@ pub struct UserModel{
     pub role: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, ToSchema, Debug)]
 pub struct UserListModel{
     pub user_id: i32,
     pub username: String,
