@@ -12,7 +12,7 @@ use crate::{
     request_body = UserRegisterSchema,
     responses(
         (status = 200),
-        (status = 400),
+        (status = 400, body = ErrorModel),
     )
 )]
 pub async fn user_register(body: web::Json<UserRegisterSchema>, 
@@ -54,7 +54,7 @@ pub async fn user_register(body: web::Json<UserRegisterSchema>,
     request_body = UserLoginSchema,
     responses(
         (status = 200),
-        (status = 400),
+        (status = 400, body = ErrorModel),
     )
 )]
 pub async fn user_login(request: HttpRequest, 
@@ -105,7 +105,7 @@ pub async fn user_login(request: HttpRequest,
     path = "/api/user/list",
     responses(
         (status = 200, body = Vec<UserListModel>),
-        (status = 401, body = ErrorModel),
+        (status = 401),
     )
 )]
 pub async fn user_list(data: web::Data<AppState>,
@@ -119,7 +119,7 @@ pub async fn user_list(data: web::Data<AppState>,
     path = "/api/user/logout",
     responses(
         (status = 200),
-        (status = 400),
+        (status = 400, body = ErrorModel),
     )
 )]
 pub async fn user_logout(identity: Identity) -> ServerResponse {

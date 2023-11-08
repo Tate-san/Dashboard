@@ -12,14 +12,16 @@ pub struct DeviceStructureModel{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DeviceModel{
     pub device_id: i32,
+    pub owner_id: i32,
     pub name: String,
     pub topic: String,
 }
 
 impl DeviceModel{
-    pub fn new(name: String, topic: String) -> Self {
+    pub fn new(name: String, topic: String, owner_id: i32) -> Self {
         DeviceModel{
             device_id: 0,
+            owner_id: owner_id,
             name: name,
             topic: topic,
         }
@@ -47,9 +49,18 @@ impl DeviceModel{
     }
 
     pub async fn insert(&self, conn: &sqlx::Pool<Postgres>) -> DatabaseResult<PgQueryResult> {
-        sqlx::query(r#"INSERT INTO devices(name,topic) VALUES ($1, $2)"#)
+        sqlx::query(r#"INSERT INTO devices(name,topic,owner_id) VALUES ($1, $2, $3)"#)
             .bind(&self.name)
             .bind(&self.topic)
+            .bind(&self.owner_id)
+            .execute(conn)
+            .await
+            .map_err(|err| err.into())
+    }
+
+    pub async fn delete(conn: &sqlx::Pool<Postgres>, device_id: i32) -> DatabaseResult<PgQueryResult> {
+        sqlx::query(r#"DELETE FROM devices where device_id = $1"#)
+            .bind(device_id)
             .execute(conn)
             .await
             .map_err(|err| err.into())

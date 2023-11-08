@@ -5,13 +5,13 @@ use crate::{
 use super::prelude::*;
 
 #[derive(Deserialize)]
-pub struct DeleteQuery {
+pub struct SystemDeleteQuery {
     pub system_id: i32,
 }
 
 #[utoipa::path(
     post,
-    path = "/api/system/new",
+    path = "/api/system",
     request_body = SystemNewSchema,
     responses(
         (status = 200),
@@ -50,7 +50,7 @@ pub async fn system_new(body: web::Json<SystemNewSchema>,
 
 #[utoipa::path(
     delete,
-    path = "/api/system/delete/{system_id}",
+    path = "/api/system/{system_id}",
     responses(
         (status = 200),
         (status = 400, body = ErrorModel),
@@ -60,7 +60,7 @@ pub async fn system_new(body: web::Json<SystemNewSchema>,
             ("system_id" = i32, Path, description = ""),
         )
 )]
-pub async fn system_delete(query: web::Path<DeleteQuery>, 
+pub async fn system_delete(query: web::Path<SystemDeleteQuery>, 
                         identity: Identity,
                         data: web::Data<AppState>) -> ServerResponse {
 
@@ -106,6 +106,7 @@ pub async fn system_add_user(body: web::Json<SystemAddUserSchema>,
                         identity: Identity,
                         data: web::Data<AppState>) -> ServerResponse {
 
+    println!("Post");
     let user_id: i32 = identity.id().unwrap().parse().unwrap();
 
     let system = match SystemModel::find_by_id(&data.db, body.system_id).await {
@@ -157,14 +158,14 @@ pub async fn system_delete_user(body: web::Json<SystemDeleteUserSchema>,
             serde_json::json!(ResponseError::SystemDoesntExist.get_error())))
     };
 
-    if let Err(_) = SystemAccessModel::find_by_user_id_system_id(&data.db, body.user_id, body.system_id).await {
-        return Ok(HttpResponse::BadRequest().json(
-            serde_json::json!(ResponseError::SystemAlreadyMember.get_error())))
-    }
-
     if system.owner_id != user_id {
         return Ok(HttpResponse::BadRequest().json(
             serde_json::json!(ResponseError::SystemNotOwner.get_error())));
+    }
+
+    if let Err(_) = SystemAccessModel::find_by_user_id_system_id(&data.db, body.user_id, body.system_id).await {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!(ResponseError::SystemNotMember.get_error())))
     }
 
     if system.owner_id == body.user_id {
@@ -174,6 +175,6 @@ pub async fn system_delete_user(body: web::Json<SystemDeleteUserSchema>,
 
     let delete_access = SystemAccessModel::new(body.system_id, body.user_id);
     delete_access.delete(&data.db).await?;
-
+ 
     Ok(HttpResponse::Ok().finish())
 }

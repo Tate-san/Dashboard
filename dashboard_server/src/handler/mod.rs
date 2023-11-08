@@ -34,13 +34,14 @@ pub fn config(conf: &mut web::ServiceConfig) {
                 .route("/roles", web::get().to(user_handler::list_roles))
             )
             .service(web::scope("/device")
-                .route("/new", web::post().to(device_handler::device_new))
+                .route("", web::post().to(device_handler::device_new))
+                .route("/{device_id}", web::delete().to(device_handler::device_delete))
             )
             .service(web::scope("/system")
-                .route("/new", web::post().to(system_handler::system_new))
-                .route("/delete/{system_id}", web::delete().to(system_handler::system_delete))
+                .route("", web::post().to(system_handler::system_new))
                 .route("/user", web::post().to(system_handler::system_add_user))
                 .route("/user", web::delete().to(system_handler::system_delete_user))
+                .route("/{system_id}", web::delete().to(system_handler::system_delete))
             );
             
 

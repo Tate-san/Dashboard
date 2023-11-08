@@ -47,6 +47,9 @@ pub enum ResponseError {
     SystemAlreadyOwner,
     SystemAlreadyMember,
     DeviceAlreadyExists,
+    SystemNotMember,
+    DeviceNotOwner,
+    DeviceDoesntExist,
     InternalError(String),
 }
 
@@ -60,9 +63,12 @@ impl ResponseError {
             Self::SystemAlreadyExists => ErrorModel::new("SYSTEM_ALREADY_EXISTS", "System with this name already exists"),
             Self::SystemAlreadyMember => ErrorModel::new("SYSTEM_ALREADY_MEMBER", "User is already member of the system"),
             Self::SystemAlreadyOwner => ErrorModel::new("SYSTEM_ALREADY_OWNER", "Cannot add access to owner, who already has full access"),
+            Self::SystemNotMember => ErrorModel::new("SYSTEM_NOT_MEMBER", "User is not a member of the system"),
             Self::SystemDoesntExist => ErrorModel::new("SYSTEM_DOESNT_EXIST", "System doesn't exist"),
             Self::SystemNotOwner => ErrorModel::new("SYSTEM_NOT_OWNER", "You are not the owner of the system"),
             Self::DeviceAlreadyExists => ErrorModel::new("DEVICE_ALREADY_EXISTS", "Device with this name already exists"),
+            Self::DeviceNotOwner => ErrorModel::new("DEVICE_NOT_OWNER", "You are not the owner of the device"),
+            Self::DeviceDoesntExist => ErrorModel::new("DEVICE_DOESNT_EXIST", "Device doesn't exist"),
             Self::InternalError(message) => ErrorModel::new("INTERNAL_ERROR", message),
         }
     }

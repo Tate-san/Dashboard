@@ -5,13 +5,13 @@ use crate::{
 use super::prelude::*;
 
 #[derive(Deserialize)]
-struct DeleteQuery {
-    device_id: u32,
+pub struct DeviceDeleteQuery {
+    pub device_id: i32,
 }
 
 #[utoipa::path(
     post,
-    path = "/api/device/new",
+    path = "/api/device",
     request_body = DeviceNewSchema,
     responses(
         (status = 200),
@@ -20,8 +20,10 @@ struct DeleteQuery {
     ),
 )]
 pub async fn device_new(body: web::Json<DeviceNewSchema>, 
-                        _: Identity,
+                        identity: Identity,
                         data: web::Data<AppState>) -> ServerResponse {
+
+    let user_id: i32 = identity.id().unwrap().parse().unwrap();
 
     if let Ok(_) = DeviceModel::find_by_name(&data.db, body.name.clone()).await {
         return Ok(HttpResponse::BadRequest().json(
@@ -29,9 +31,49 @@ pub async fn device_new(body: web::Json<DeviceNewSchema>,
         ));
     }
 
-    let new_device = DeviceModel::new(body.name.clone(), body.topic.clone());
+    let new_device = DeviceModel::new(body.name.clone(), body.topic.clone(), user_id);
 
     let response = new_device.insert(&data.db).await;
+
+    match response {
+        Ok(_) => Ok(HttpResponse::Ok().finish()),
+        Err(error) => Err(error.into())
+    }
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/device",
+    responses(
+        (status = 200),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    ),
+)]
+pub async fn device_delete(query: web::Path<DeviceDeleteQuery>, 
+                        identity: Identity,
+                        data: web::Data<AppState>) -> ServerResponse {
+
+   let user_id: i32 = identity.id().unwrap().parse().unwrap();
+
+    let found_device = DeviceModel::find_by_id(&data.db, 
+                                                                query.device_id 
+                                                            ).await;
+
+    match found_device {
+        Ok(device) => {
+            if device.owner_id != user_id {
+                return Ok(HttpResponse::BadRequest().json(
+                    serde_json::json!(ResponseError::DeviceNotOwner.get_error())));
+            }
+        }
+        Err(_) => {
+            return Ok(HttpResponse::BadRequest().json(
+                    serde_json::json!(ResponseError::DeviceDoesntExist.get_error())));
+        }
+    }
+
+    let response = DeviceModel::delete(&data.db, query.device_id).await;
 
     match response {
         Ok(_) => Ok(HttpResponse::Ok().finish()),
