@@ -3,7 +3,7 @@
     import { Card, Button, Toggle } from 'flowbite-svelte';
     let hCard = false;
 
-	import Gauge from './Gauge.svelte';
+	import Gauge from '../components/Gauge.svelte';
 </script>
 
 <!-- Device name gets passed to the Gauge component instances as a prop - based on the type of device --> 

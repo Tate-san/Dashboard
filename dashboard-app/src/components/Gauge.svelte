@@ -48,39 +48,40 @@
     </svg>
   </div>
     
-  <style>
-    .gauge-container {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-  
-    .gauge-svg {
-      width: 240px;
-      height: 240px;
-    }
+  <style lang="scss">
   
     .gauge {
       fill: none;
+
+      &-container {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+    
+      &-svg {
+        width: 240px;
+        height: 240px;
+      }
+
+      &-background {
+        stroke: #ccc;
+        stroke-width: 20;
+      }
+      
+      &-foreground {
+        stroke: #F37748;
+        stroke-width: 20;
+        transition: stroke-dasharray 0.5s ease-in-out;
+      }
+
+      &-text {
+        font-size: 35px;
+        font-weight: 2400;
+        font-family:'Verdana',;
+        fill: #fff; 
+      }
     }
-  
-    .gauge-background {
-      stroke: #ccc;
-      stroke-width: 20;
-    }
-  
-    .gauge-foreground {
-      stroke: #F37748;
-      stroke-width: 20;
-      transition: stroke-dasharray 0.5s ease-in-out;
-    }
-  
-    .gauge-text {
-      font-size: 35px;
-      font-weight: 2400;
-      font-family:'Verdana',;
-      fill: #fff; 
-    }
-  
+     
     .buttons {
       text-align: center;
     }
@@ -115,38 +116,40 @@
     </svg>
   </div>
   
-  <style>
-    .gauge-container {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-  
-    .gauge-svg {
-      width: 240px;
-      height: 240px;
-    }
+  <style lang="scss">
   
     .gauge {
       fill: none;
+
+      &-container {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+    
+      &-svg {
+        width: 240px;
+        height: 240px;
+      }
+
+      &-background {
+        stroke: #ccc;
+        stroke-width: 20;
+      }
+    
+      &-foreground {
+        stroke: #FF5733;
+        stroke-width: 20;
+        transition: stroke-dasharray 0.5s ease-in-out;
+      }
+    
+      &-text {
+        font-size: 24px;
+        font-weight: 600;
+        font-family:monospace;
+        fill: #fff; 
+      }
     }
   
-    .gauge-background {
-      stroke: #ccc;
-      stroke-width: 20;
-    }
-  
-    .gauge-foreground {
-      stroke: #FF5733;
-      stroke-width: 20;
-      transition: stroke-dasharray 0.5s ease-in-out;
-    }
-  
-    .gauge-text {
-      font-size: 24px;
-      font-weight: 600;
-      font-family:monospace;
-      fill: #fff; 
-    }
   
     .buttons {
       text-align: center;
