@@ -27,6 +27,9 @@
 	"dependencies": {
 		"@sveltejs/adapter-static": "^2.0.3",
 		"chart.js": "^4.4.0",
+		"d3-scale": "^4.0.2",
+		"d3-shape": "^3.2.0",
+		"flowbite-svelte-icons": "^0.4.5",
 		"framework7-svelte": "^8.3.0",
 		"fusioncharts": "^3.21.1",
 		"svelte-fusioncharts": "^1.0.0"
