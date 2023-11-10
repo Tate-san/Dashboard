@@ -93,6 +93,22 @@ pub async fn system_delete(query: web::Path<SystemDeleteQuery>,
 }
 
 #[utoipa::path(
+    get,
+    path = "/api/system/list",
+    responses(
+        (status = 200, body = Vec<SystemListModel>),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    )
+)]
+pub async fn system_list(data: web::Data<AppState>) -> ServerResponse {
+
+    let system_list = SystemModel::get_all_systems(&data.db).await?;
+
+    Ok(HttpResponse::Ok().json(system_list))
+}
+
+#[utoipa::path(
     post,
     path = "/api/system/user",
     request_body = SystemAddUserSchema,

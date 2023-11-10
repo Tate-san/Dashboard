@@ -51,11 +51,16 @@ async fn main() -> std::io::Result<()> {
             handler::user_handler::user_logout,
             handler::user_handler::user_list,
             handler::user_handler::list_roles,
+
             handler::system_handler::system_new,
             handler::system_handler::system_delete,
+            handler::system_handler::system_list,
             handler::system_handler::system_add_user,
             handler::system_handler::system_delete_user,
+
             handler::device_handler::device_new,
+            handler::device_handler::device_delete,
+            handler::device_handler::device_list,
         ), 
         components(
             schemas(
@@ -63,10 +68,17 @@ async fn main() -> std::io::Result<()> {
                 schema::user_schema::UserLoginSchema,
                 model::user_model::UserListModel,
                 model::user_model::RoleListModel,
+
+                schema::device_schema::DeviceNewSchema,
+                model::device_model::DeviceModel,
+                model::device_model::DeviceListModel,
+                model::device_model::DeviceStructureModel,
+
                 schema::system_schema::SystemNewSchema,
                 schema::system_schema::SystemAddUserSchema,
                 schema::system_schema::SystemDeleteUserSchema,
-                schema::device_schema::DeviceNewSchema,
+                model::system_model::SystemListModel,
+
                 model::ErrorModel,
             )
         )

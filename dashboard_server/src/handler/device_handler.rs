@@ -1,6 +1,6 @@
 use crate::{
     schema::device_schema::DeviceNewSchema, 
-    model::DeviceModel
+    model::{DeviceModel, DeviceListModel}
 };
 use super::prelude::*;
 
@@ -43,12 +43,15 @@ pub async fn device_new(body: web::Json<DeviceNewSchema>,
 
 #[utoipa::path(
     delete,
-    path = "/api/device",
+    path = "/api/device/{device_id}",
     responses(
         (status = 200),
         (status = 400, body = ErrorModel),
         (status = 401),
     ),
+    params(
+            ("device_id" = i32, Path, description = ""),
+        )
 )]
 pub async fn device_delete(query: web::Path<DeviceDeleteQuery>, 
                         identity: Identity,
@@ -79,4 +82,23 @@ pub async fn device_delete(query: web::Path<DeviceDeleteQuery>,
         Ok(_) => Ok(HttpResponse::Ok().finish()),
         Err(error) => Err(error.into())
     }
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/device/list",
+    responses(
+        (status = 200, body = Vec<DeviceListModel>),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    ),
+)]
+pub async fn device_list(identity: Identity,
+                        data: web::Data<AppState>) -> ServerResponse {
+
+    let user_id: i32 = identity.id().unwrap().parse().unwrap();
+
+    let device_list = DeviceModel::get_user_devices(&data.db, user_id).await?; 
+
+    Ok(HttpResponse::Ok().json(device_list))
 }

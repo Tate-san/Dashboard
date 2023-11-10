@@ -1,6 +1,6 @@
 use super::prelude::*;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, ToSchema, Debug)]
 pub struct DeviceStructureModel{
     pub devicestructure_id: i32,
     pub device_id: i32,
@@ -9,15 +9,23 @@ pub struct DeviceStructureModel{
     pub data_type: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct DeviceModel{
+#[derive(Serialize, Deserialize, ToSchema, Debug)]
+pub struct DeviceModel {
     pub device_id: i32,
     pub owner_id: i32,
     pub name: String,
     pub topic: String,
 }
 
-impl DeviceModel{
+#[derive(Serialize, Deserialize, ToSchema, Debug)]
+pub struct DeviceListModel {
+    pub device_id: i32,
+    pub owner_id: i32,
+    pub name: String,
+}
+
+impl DeviceModel {
+
     pub fn new(name: String, topic: String, owner_id: i32) -> Self {
         DeviceModel{
             device_id: 0,
@@ -27,22 +35,36 @@ impl DeviceModel{
         }
     }
 
-    pub async fn list_all_devices(conn: &sqlx::Pool<Postgres>) -> DatabaseResult<Vec<DeviceModel>> {
-        sqlx::query_as!(DeviceModel, r#"SELECT * from devices"#)
+    pub async fn get_all_devices(conn: &sqlx::Pool<Postgres>) -> DatabaseResult<Vec<DeviceListModel>> {
+        sqlx::query_as!(DeviceListModel, r#"SELECT device_id,owner_id,name FROM devices"#)
             .fetch_all(conn)
             .await
             .map_err(|err| err.into())
     }
 
+    pub async fn get_user_devices(conn: &sqlx::Pool<Postgres>, user_id: i32) -> DatabaseResult<Vec<DeviceListModel>> {
+        sqlx::query_as!(DeviceListModel, r#"SELECT device_id,owner_id,name FROM devices WHERE owner_id = $1"#, user_id)
+            .fetch_all(conn)
+            .await
+            .map_err(|err| err.into())
+    }
+
+    pub async fn list_by_owner(conn: &sqlx::Pool<Postgres>, user_id: i32) -> DatabaseResult<DeviceModel> {
+        sqlx::query_as!(DeviceModel, r#"SELECT * FROM devices WHERE owner_id = $1"#, user_id)
+            .fetch_one(conn)
+            .await
+            .map_err(|err| err.into())
+    }
+
     pub async fn find_by_name(conn: &sqlx::Pool<Postgres>, name: String) -> DatabaseResult<DeviceModel> {
-        sqlx::query_as!(DeviceModel, r#"SELECT * from devices WHERE name = $1"#, name)
+        sqlx::query_as!(DeviceModel, r#"SELECT * FROM devices WHERE name = $1"#, name)
             .fetch_one(conn)
             .await
             .map_err(|err| err.into())
     }
 
     pub async fn find_by_id(conn: &sqlx::Pool<Postgres>, id: i32) -> DatabaseResult<DeviceModel> {
-        sqlx::query_as!(DeviceModel, r#"SELECT * from devices WHERE device_id = $1"#, id)
+        sqlx::query_as!(DeviceModel, r#"SELECT * FROM devices WHERE device_id = $1"#, id)
             .fetch_one(conn)
             .await
             .map_err(|err| err.into())
