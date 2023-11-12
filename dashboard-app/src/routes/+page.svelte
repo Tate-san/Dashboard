@@ -9,6 +9,16 @@
 
 </script>
 
+
+<style>
+    :global(html, body) {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #7B7B7B;
+    }
+</style>
+
 <Navbar />
-<Sidebar />
+<!-- <Sidebar /> -->
 <Gauge />
