@@ -1,12 +1,23 @@
 use crate::{
-    schema::device_schema::DeviceNewSchema, 
-    model::{DeviceModel, DeviceListModel}
+    schema::device_schema::{DeviceNewSchema, DeviceStructureNewSchema}, 
+    model::{DeviceModel, DeviceListModel, DeviceStructureModel}
 };
 use super::prelude::*;
 
 #[derive(Deserialize)]
 pub struct DeviceDeleteQuery {
     pub device_id: i32,
+}
+
+#[derive(Deserialize)]
+pub struct DeviceGetQuery {
+    pub device_id: i32,
+}
+
+#[derive(Deserialize)]
+pub struct DeviceStructureDeleteQuery {
+    pub device_id: i32,
+    pub structure_id: i32,
 }
 
 #[utoipa::path(
@@ -25,7 +36,7 @@ pub async fn device_new(body: web::Json<DeviceNewSchema>,
 
     let user_id: i32 = identity.id().unwrap().parse().unwrap();
 
-    if let Ok(_) = DeviceModel::find_by_name(&data.db, body.name.clone()).await {
+    if let Ok(_) = DeviceListModel::find_by_name_and_user_id(&data.db, &body.name, user_id).await {
         return Ok(HttpResponse::BadRequest().json(
             serde_json::json!(ResponseError::DeviceAlreadyExists.get_error())
         ));
@@ -98,7 +109,119 @@ pub async fn device_list(identity: Identity,
 
     let user_id: i32 = identity.id().unwrap().parse().unwrap();
 
-    let device_list = DeviceModel::get_user_devices(&data.db, user_id).await?; 
+    let device_list = DeviceListModel::get_user_devices(&data.db, user_id).await?; 
 
     Ok(HttpResponse::Ok().json(device_list))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/device/{device_id}",
+    responses(
+        (status = 200),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    ),
+    params(
+            ("device_id" = i32, Path, description = ""),
+        )
+)]
+pub async fn get_device(query: web::Path<DeviceGetQuery>,
+                        identity: Identity,
+                        data: web::Data<AppState>) -> ServerResponse {
+
+    let user_id: i32 = identity.id().unwrap().parse().unwrap();
+
+    let device = DeviceModel::find_by_id(&data.db, query.device_id).await?;   
+
+    // TODO check for owner/user has access
+    /*
+    if user_id != device.owner_id {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!(ResponseError::DeviceNotOwner.get_error())));
+    }
+    */
+
+    Ok(HttpResponse::Ok().json(device))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/device/{device_id}/structure",
+    responses(
+        (status = 200, body = Vec<DeviceStructureNewSchema>),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    ),
+    params(
+            ("device_id" = i32, Path, description = ""),
+        )
+)]
+pub async fn device_insert_structure(query: web::Path<DeviceGetQuery>,
+                        body: web::Json<Vec<DeviceStructureNewSchema>>,
+                        identity: Identity,
+                        data: web::Data<AppState>) -> ServerResponse {
+
+    let user_id: i32 = identity.id().unwrap().parse().unwrap();
+
+    let device = match DeviceModel::find_by_id(&data.db, query.device_id).await {
+        Ok(result) => result,
+        Err(_) => return Ok(HttpResponse::BadRequest().json(
+                                serde_json::json!(ResponseError::DeviceDoesntExist.get_error())))
+    };
+
+    if user_id != device.owner_id {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!(ResponseError::DeviceNotOwner.get_error())));
+    }
+
+    for s in body.0 {
+        let structure = DeviceStructureModel::new(query.device_id, 
+                                                                        s.real_name,
+                                                                        s.alias_name,
+                                                                        s.data_type);
+        structure.insert(&data.db).await?;
+    }
+
+    Ok(HttpResponse::Ok().finish())
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/device/{device_id}/structure/{structure_id}",
+    responses(
+        (status = 200),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    ),
+    params(
+            ("device_id" = i32, Path, description = ""),
+            ("structure_id" = i32, Path, description = ""),
+        )
+)]
+pub async fn device_delete_structure(query: web::Path<DeviceStructureDeleteQuery>,
+                        identity: Identity,
+                        data: web::Data<AppState>) -> ServerResponse {
+
+    let user_id: i32 = identity.id().unwrap().parse().unwrap();
+
+    let device = match DeviceModel::find_by_id(&data.db, query.device_id).await {
+        Ok(result) => result,
+        Err(_) => return Ok(HttpResponse::BadRequest().json(
+                                serde_json::json!(ResponseError::DeviceDoesntExist.get_error())))
+    };
+
+    if user_id != device.owner_id {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!(ResponseError::DeviceNotOwner.get_error())));
+    }
+
+    if let Err(_) = DeviceStructureModel::find_by_id(&data.db, query.structure_id).await {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!(ResponseError::DeviceStructureDoesntExist.get_error())));
+    }
+
+    DeviceStructureModel::delete(&data.db, query.structure_id).await?;
+
+    Ok(HttpResponse::Ok().finish())
 }

@@ -24,7 +24,7 @@ pub async fn user_register(body: web::Json<UserRegisterSchema>,
                     .json(serde_json::json!(ResponseError::UserLoggedIn.get_error())));
     }
 
-    if let Ok(_) = UserModel::find_by_name(&data.db, &body.username).await {
+    if let Ok(usr) = UserModel::find_by_name(&data.db, &body.username).await {
         return Ok(HttpResponse::BadRequest()
                     .json(serde_json::json!(ResponseError::UserAlreadyExists.get_error())));
     }

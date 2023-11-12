@@ -61,6 +61,9 @@ async fn main() -> std::io::Result<()> {
             handler::device_handler::device_new,
             handler::device_handler::device_delete,
             handler::device_handler::device_list,
+            handler::device_handler::get_device,
+            handler::device_handler::device_insert_structure,
+            handler::device_handler::device_delete_structure,
         ), 
         components(
             schemas(
@@ -70,6 +73,7 @@ async fn main() -> std::io::Result<()> {
                 model::user_model::RoleListModel,
 
                 schema::device_schema::DeviceNewSchema,
+                schema::device_schema::DeviceStructureNewSchema,
                 model::device_model::DeviceModel,
                 model::device_model::DeviceListModel,
                 model::device_model::DeviceStructureModel,

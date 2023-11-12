@@ -50,6 +50,7 @@ pub enum ResponseError {
     SystemNotMember,
     DeviceNotOwner,
     DeviceDoesntExist,
+    DeviceStructureDoesntExist,
     InternalError(String),
 }
 
@@ -69,6 +70,7 @@ impl ResponseError {
             Self::DeviceAlreadyExists => ErrorModel::new("DEVICE_ALREADY_EXISTS", "Device with this name already exists"),
             Self::DeviceNotOwner => ErrorModel::new("DEVICE_NOT_OWNER", "You are not the owner of the device"),
             Self::DeviceDoesntExist => ErrorModel::new("DEVICE_DOESNT_EXIST", "Device doesn't exist"),
+            Self::DeviceStructureDoesntExist => ErrorModel::new("DEVICE_STRUCTURE_DOESNT_EXIST", "Device structure doesn't exist"),
             Self::InternalError(message) => ErrorModel::new("INTERNAL_ERROR", message),
         }
     }
