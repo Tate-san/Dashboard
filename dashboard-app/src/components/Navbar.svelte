@@ -5,31 +5,30 @@
     $: activeUrl = $page.url.pathname;
 </script>
 
-<div class="navbar" color="">
-  <Navbar color="!bg-blue-500"> 
-    <NavBrand href="/">
+<div class="!bg-navbar-bg w-screen max-h-[4rem] h-[4rem] px-10 py-2 flex flex-row justify-between"> 
+
+  <div class="flex flex-row gap-x-4">
+
+    <NavBrand class="text-white text-2xl hover:text-orange-600" href="/">
+      <i class="fa-solid fa-chevron-left mr-2"></i>
+    </NavBrand>
+
+    <NavBrand class="text-white text-2xl hover:text-orange-600" href="/">
+      <i class="fa-solid fa-chevron-right mr-2"></i>
+    </NavBrand>
+
+    <NavBrand class="text-white text-xl hover:text-orange-600" href="/">
       <i class="fa-solid fa-house mr-2"></i>
-      <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">Dashboard</span>
-    </NavBrand>
+    </NavBrand>"
   
-    <NavBrand href="/">
-      <i class="fa-solid fa-right-long mr-2"></i>
-      <span class="self-center whitespace-nowrap text-r font-regular dark:text-white">Forward</span>
-    </NavBrand>
-  
-    <NavBrand href="/">
-      <i class="fa-solid fa-left-long mr-2"></i>
-      <span class="self-center whitespace-nowrap text-r font-regular dark:text-white">Back</span>
-    </NavBrand>
-  
-    <div>
-      <Input id="search-navbar" class="pl-10" placeholder="Search..." />
-    </div>
-    
-    <NavUl {activeUrl}>
-      <NavLi href="/">Home</NavLi>
-      <NavLi class="cursor-pointer">
-        Regular user<ChevronDownOutline class="w-3 h-3 ml-2 text-primary-800 dark:text-white inline" />
+  </div>
+
+  <div class="flex flex-row items-center gap-x-6">
+    <Input id="search-navbar" class="max-h-[2rem] max-w-[15rem]" placeholder="&#xF002; Search..." />
+
+    <NavUl {activeUrl} ulClass="text-md">
+      <NavLi class="cursor-pointer text-white !hover:text-orange-600 whitespace-nowrap">
+        Regular user<ChevronDownOutline class="w-3 h-3 ml-2 inline" />
       </NavLi>
       <Dropdown class="w-44 z-20">
         <DropdownItem href="/">Dashboard</DropdownItem>
@@ -39,5 +38,14 @@
         <DropdownItem href="/">Sign out</DropdownItem>
       </Dropdown>
     </NavUl>
-  </Navbar>
+  </div>
 </div>
+
+<style lang="scss">
+  :global(#search-navbar) {
+    font-family: 'Helvetica', FontAwesome, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    text-decoration: inherit;
+  }
+</style>
