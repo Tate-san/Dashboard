@@ -96,7 +96,7 @@
       <NavLi class="cursor-pointer text-white !hover:text-orange-600 whitespace-nowrap">
         Not logged in<ChevronDownOutline class="w-3 h-3 ml-2 inline" />
       </NavLi>
-      <Dropdown class="w-80 z-20 bg-slate-600" on:show={() => isLoginInvalid = false}>
+      <Dropdown class="w-80 z-20 bg-slate-900" on:show={() => isLoginInvalid = false}>
           <div class="w-full h-fit flex flex-col p-2 gap-2">
             {#if isLoginInvalid}
             <Alert color="red">
@@ -104,11 +104,20 @@
               <span class="font-small">Invalid username or password!</span>
             </Alert>
             {/if}
-            <Label for="username">Username:</Label>
-            <Input class="h-8" id="username" bind:value={loginForm.username}/>
-            <Label for="password">Password:</Label>
-            <Input class="h-8" id="password" type="password" bind:value={loginForm.password}/>
-            <Button class="w-fit self-center" on:click={onLoginUser}>Log in</Button>
+            <!-- <Label for="username">Username:</Label> -->
+            
+            <div class="flex">
+              <i class="fa-solid fa-user m-2 text-white"></i>
+              <Input class="h-8 w-64 m-0.5" id="username" placeholder="Username" bind:value={loginForm.username}/>
+            </div>
+            
+            <!-- <Label for="password">Password:</Label> -->
+            <div class="flex">
+              <i class="fa-solid fa-lock m-2 text-white"></i>
+              <Input class="h-8 w-64 m-0.5" id="password" type="password" placeholder="Password" bind:value={loginForm.password}/>
+            </div>
+            
+            <Button class="w-fit self-center" on:click={onLoginUser}>Sign in</Button>
             <A class="font-medium hover:underline" on:click={() => {registerState.modal = true; registerState.isInvalid = false;}}>Create new account</A>
           </div>
       </Dropdown>
