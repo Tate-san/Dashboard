@@ -41,3 +41,17 @@ export async function login(username, password) {
         return Promise.reject(e);
     });
 }
+
+export async function register(username, password) {
+
+    return apiRequest("post", "/user/register", {
+        username,
+        password
+    })
+    .then((data) => {
+        return Promise.resolve(data);
+    })
+    .catch((e) => {
+        return Promise.reject(e);
+    });
+}

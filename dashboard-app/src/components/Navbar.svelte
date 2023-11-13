@@ -1,30 +1,58 @@
 <script>
-  import { auth_store, login, logout }  from "../hooks/auth";
-  import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Dropdown, DropdownItem, DropdownDivider, Input, Label, Button } from 'flowbite-svelte';
+  import { auth_store, login, logout, register }  from "../hooks/auth";
+  import { Navbar, NavBrand, NavLi, NavUl,
+            Dropdown, DropdownItem, DropdownDivider, 
+            Input, Label, Button, Alert, A,
+            Modal} from 'flowbite-svelte';
   import { ChevronDownOutline } from 'flowbite-svelte-icons';
   import { page } from '$app/stores';
-  import { Alert } from 'flowbite-svelte';
   import { InfoCircleSolid } from 'flowbite-svelte-icons';
 
   $: activeUrl = $page.url.pathname;
 
-  var loginForm = {
+  let loginForm = {
     username: "",
     password: ""
   }
 
-  var isLoginInvalid = false;
+  let registerForm = {
+    username: "",
+    password: ""
+  }
 
-  function loginUser(){
+  let isLoginInvalid = false;
+
+  let registerState = {
+    modal: false,
+    isInvalid: false,
+    errorMessage: ""
+  };
+
+  function onLoginUser(){
+    isLoginInvalid = false;
 
     login(loginForm.username, loginForm.password).then((a) => {
       loginForm = {
         username: "",
         password: "",
       }
-      isLoginInvalid = false;
     }).catch((e) => {
       isLoginInvalid = true;
+    })
+  }
+
+  function onRegisterUser(){
+    registerState.isInvalid = false;
+
+    register(registerForm.username, registerForm.password).then(() => {
+        registerForm = {
+          username: "",
+          password: ""
+        };
+        registerState.modal = false;
+    }).catch((e) => {
+        registerState.isInvalid = true;
+        registerState.errorMessage = e.response.data.message;
     })
   }
 
@@ -71,7 +99,7 @@
       <Dropdown class="w-80 z-20 bg-slate-600" on:show={() => isLoginInvalid = false}>
           <div class="w-full h-fit flex flex-col p-2 gap-2">
             {#if isLoginInvalid}
-            <Alert color="red" dismissable>
+            <Alert color="red">
               <InfoCircleSolid slot="icon" class="w-4 h-4" />
               <span class="font-small">Invalid username or password!</span>
             </Alert>
@@ -80,13 +108,35 @@
             <Input class="h-8" id="username" bind:value={loginForm.username}/>
             <Label for="password">Password:</Label>
             <Input class="h-8" id="password" type="password" bind:value={loginForm.password}/>
-            <Button class="w-fit self-center" on:click={loginUser}>Log in</Button>
+            <Button class="w-fit self-center" on:click={onLoginUser}>Log in</Button>
+            <A class="font-medium hover:underline" on:click={() => {registerState.modal = true; registerState.isInvalid = false;}}>Create new account</A>
           </div>
       </Dropdown>
     {/if}
     </NavUl>
   </div>
 </div>
+
+<Modal bind:open={registerState.modal} on:show={() => registerState.isInvalid = false} size="xs" autoclose={false} class="w-full">
+  <div class="flex flex-col space-y-6">
+    <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Register</h3>
+    {#if registerState.isInvalid}
+      <Alert color="red">
+        <InfoCircleSolid slot="icon" class="w-4 h-4" />
+        <span class="font-small">{registerState.errorMessage}</span>
+      </Alert>
+    {/if}
+    <Label class="space-y-2">
+      <span>Username</span>
+      <Input placehoder="user" bind:value={registerForm.username} required />
+    </Label>
+    <Label class="space-y-2">
+      <span>Password</span>
+      <Input type="password" name="password" placeholder="•••••" bind:value={registerForm.password} required />
+    </Label>
+    <Button class="w-full1" on:click={onRegisterUser}>Create account</Button>
+  </div>
+</Modal>
 
 <style lang="scss">
   :global(#search-navbar) {

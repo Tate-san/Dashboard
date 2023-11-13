@@ -24,6 +24,11 @@ pub async fn user_register(body: web::Json<UserRegisterSchema>,
                     .json(serde_json::json!(ResponseError::UserLoggedIn.get_error())));
     }
 
+    if body.0.username.is_empty() || body.0.password.is_empty() {
+        return Ok(HttpResponse::BadRequest()
+                    .json(serde_json::json!(ResponseError::UserPasswordCantBeEmpty.get_error())));
+    }
+
     if let Ok(usr) = UserModel::find_by_name(&data.db, &body.username).await {
         return Ok(HttpResponse::BadRequest()
                     .json(serde_json::json!(ResponseError::UserAlreadyExists.get_error())));
