@@ -5,15 +5,3 @@ pub struct SystemNewSchema{
     pub name: String,
     pub description: String,
 }
-
-#[derive(Serialize, Deserialize, ToSchema, Debug)]
-pub struct SystemAddUserSchema{
-    pub user_id: i32,
-    pub system_id: i32,
-}
-
-#[derive(Serialize, Deserialize, ToSchema, Debug)]
-pub struct SystemDeleteUserSchema{
-    pub user_id: i32,
-    pub system_id: i32,
-}

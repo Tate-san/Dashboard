@@ -1,6 +1,5 @@
 use super::prelude::*;
 
-
 #[derive(Serialize, Deserialize, ToSchema, Debug)]
 pub struct SystemAccessModel{
     pub systemaccess_id: i32,

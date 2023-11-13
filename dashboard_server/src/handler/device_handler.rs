@@ -43,13 +43,18 @@ pub async fn device_new(body: web::Json<DeviceNewSchema>,
     }
 
     let new_device = DeviceModel::new(body.name.clone(), body.topic.clone(), user_id);
+    new_device.insert(&data.db).await?;
+    let new_device = DeviceListModel::find_by_name_and_user_id(&data.db, &body.name, user_id).await?;
 
-    let response = new_device.insert(&data.db).await;
-
-    match response {
-        Ok(_) => Ok(HttpResponse::Ok().finish()),
-        Err(error) => Err(error.into())
+    for s in body.0.structure {
+        let new_structure = DeviceStructureModel::new(new_device.device_id, 
+                                                                            s.real_name, 
+                                                                            s.alias_name, 
+                                                                            s.data_type);
+        new_structure.insert(&data.db).await?;
     }
+
+    Ok(HttpResponse::Ok().finish())
 }
 
 #[utoipa::path(

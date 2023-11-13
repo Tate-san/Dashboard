@@ -48,9 +48,9 @@ impl DeviceListModel {
             .map_err(|err| err.into())
     }
 
-    pub async fn find_by_name_and_user_id(conn: &sqlx::Pool<Postgres>, name: &str, user_id: i32) -> DatabaseResult<Vec<DeviceListModel>> {
+    pub async fn find_by_name_and_user_id(conn: &sqlx::Pool<Postgres>, name: &str, user_id: i32) -> DatabaseResult<DeviceListModel> {
         sqlx::query_as!(DeviceListModel, r#"SELECT device_id,owner_id,name FROM devices WHERE name = $1 and owner_id = $2"#, name, user_id)
-            .fetch_all(conn)
+            .fetch_one(conn)
             .await
             .map_err(|err| err.into())
     }

@@ -4,6 +4,7 @@ use super::prelude::*;
 pub struct DeviceNewSchema {
     pub name: String,
     pub topic: String,
+    pub structure: Vec<DeviceStructureNewSchema>
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug)]

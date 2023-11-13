@@ -57,6 +57,7 @@ async fn main() -> std::io::Result<()> {
             handler::system_handler::system_list,
             handler::system_handler::system_add_user,
             handler::system_handler::system_delete_user,
+            handler::system_handler::system_user_list,
 
             handler::device_handler::device_new,
             handler::device_handler::device_delete,
@@ -79,8 +80,6 @@ async fn main() -> std::io::Result<()> {
                 model::device_model::DeviceStructureModel,
 
                 schema::system_schema::SystemNewSchema,
-                schema::system_schema::SystemAddUserSchema,
-                schema::system_schema::SystemDeleteUserSchema,
                 model::system_model::SystemListModel,
 
                 model::ErrorModel,
@@ -89,7 +88,7 @@ async fn main() -> std::io::Result<()> {
     )]
     struct ApiDoc;
 
-    let session_key = Key::generate();
+    let session_key = Key::from(std::env::var("SESSION_KEY").expect("Session key not set").as_bytes());//Key::generate();
     let server_address = std::env::var("SERVER_ADDRESS").expect("Server address not set");
     let server_port = std::env::var("SERVER_PORT").expect("Server port not set");
 

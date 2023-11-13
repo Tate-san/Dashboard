@@ -45,14 +45,14 @@ impl UserModel{
     }
 
     pub async fn find_by_id(conn: &sqlx::Pool<Postgres>, id: i32) -> DatabaseResult<UserModel> {
-        sqlx::query_as!(UserModel, r#"SELECT * from users WHERE user_id = $1"#, id)
+        sqlx::query_as!(UserModel, r#"SELECT * FROM users WHERE user_id = $1"#, id)
             .fetch_one(conn)
             .await
             .map_err(|err| err.into())
     }
 
     pub async fn list(conn: &sqlx::Pool<Postgres>) -> DatabaseResult<Vec<UserListModel>> {
-        sqlx::query_as!(UserListModel, r#"SELECT user_id,username from users"#)
+        sqlx::query_as!(UserListModel, r#"SELECT user_id,username FROM users"#)
             .fetch_all(conn)
             .await
             .map_err(|err| err.into())
@@ -66,6 +66,32 @@ impl UserModel{
             .execute(conn)
             .await
             .map_err(|err| err.into())
+    }
+
+    pub async fn list_users_in_system(conn: &sqlx::Pool<Postgres>, system_id: i32) -> DatabaseResult<Vec<UserListModel>> {
+        let query = sqlx::query!(
+            r#"
+                SELECT u.user_id, u.username, sa.system_id
+                FROM users AS u
+                LEFT JOIN systemaccess AS sa 
+                ON u.user_id = sa.user_id 
+                WHERE sa.system_id = $1
+            "#,
+            system_id
+        );
+
+        let result = query.fetch_all(conn).await?;
+
+        let mut users: Vec<UserListModel> = vec![];
+
+        for row in result {
+            users.push(UserListModel{
+                user_id: row.user_id,
+                username: row.username,
+            });
+        }
+
+        Ok(users)
     }
 }
 
