@@ -53,7 +53,7 @@ pub async fn user_register(body: web::Json<UserRegisterSchema>,
     path = "/api/user/login",
     request_body = UserLoginSchema,
     responses(
-        (status = 200),
+        (status = 200, body = UserModel),
         (status = 400, body = ErrorModel),
     )
 )]
@@ -92,7 +92,7 @@ pub async fn user_login(request: HttpRequest,
 
     if password_valid {
         Identity::login(&request.extensions(), user.user_id.to_string()).unwrap(); 
-        return Ok(HttpResponse::Ok().finish());
+        return Ok(HttpResponse::Ok().json(user));
     }
 
     return Ok(HttpResponse::BadRequest()

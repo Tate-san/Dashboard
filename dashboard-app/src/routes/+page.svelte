@@ -1,16 +1,22 @@
-<script>
-    import "../app.scss";
-    import { Card, Button, Toggle } from 'flowbite-svelte';
-    let hCard = false;
+<script> 
+  import MainLayout from "../layouts/MainLayout.svelte";
+  import Gauge from "../components/Gauge.svelte";
+  import {onMount} from "svelte";
+  import { Button } from "flowbite-svelte";
+  import {login, logout, auth_store} from "../hooks/auth";
 
-    import Navbar from "../components/Navbar.svelte";
-    import Sidebar  from '../../src/components/Sidebar.svelte';
-    import Gauge from "../components/Gauge.svelte";
+  function onLogin(){
+    login("test", "test");
+    console.log("Login");
+  }
+
+  function onLogout(){
+    logout();
+    console.log("Logout");
+  }
 
 </script>
 
-<div class="!bg-background w-screen h-screen">
-  <Navbar />
-  <!-- <Sidebar /> -->
+<MainLayout>
   <Gauge />
-</div>
+</MainLayout>
