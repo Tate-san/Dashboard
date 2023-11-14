@@ -4,6 +4,7 @@
   import {onMount} from "svelte";
   import { Button } from "flowbite-svelte";
   import { getSystemList } from "../hooks/systems";
+    import Sidebar from "../components/Sidebar.svelte";
 
   let systemList = null;
 
@@ -23,6 +24,9 @@
 </script>
 
 <MainLayout>
+  <Sidebar>
+    
+  </Sidebar>
  <!-- <Gauge />-->
 
   {#if systemList}
