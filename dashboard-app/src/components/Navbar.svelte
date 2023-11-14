@@ -58,7 +58,7 @@
 
 </script>
 
-<div class="!bg-secondary-950 w-screen max-h-[4rem] h-[4rem] px-10 py-2 flex flex-row justify-between"> 
+<div class="!bg-secondary-950 w-screen max-h-[4rem] h-[4rem] px-10 py-2 flex flex-row justify-between fixed top-0"> 
 
   <div class="flex flex-row gap-x-4">
 
