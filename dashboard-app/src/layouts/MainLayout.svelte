@@ -8,7 +8,7 @@
 
 </script>
 
-<div class="!bg-background w-screen h-screen">
+<div class="!bg-secondary-700 w-screen h-screen">
     <Navbar />
     <slot />
 </div>

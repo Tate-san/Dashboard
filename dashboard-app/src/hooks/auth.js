@@ -49,9 +49,11 @@ export async function login(username, password) {
         new_auth.id = data.user_id;
         new_auth.username = data.username;
         new_auth.isLoggedin = true;
+        return Promise.resolve(data);
     })
     .catch((e) => {
         new_auth.isLoggedin = false;
+        return Promise.reject(e);
     })
     .finally(() => {
         auth_store.set(new_auth);
