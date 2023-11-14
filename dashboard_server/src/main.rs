@@ -1,8 +1,9 @@
 use std::process::exit;
 
+use actix_session::config::PersistentSession;
 use actix_web::{HttpServer, App, web, http::header, middleware::Logger};
 use actix_cors::Cors;
-use actix_session::storage::CookieSessionStore;
+use actix_session::{storage::CookieSessionStore, config::BrowserSession};
 use actix_session::SessionMiddleware;
 use actix_identity::{Identity, IdentityMiddleware};
 use actix_web::cookie::Key;
@@ -49,6 +50,7 @@ async fn main() -> std::io::Result<()> {
             handler::user_handler::user_register,
             handler::user_handler::user_login,
             handler::user_handler::user_logout,
+            handler::user_handler::user_auth_model,
             handler::user_handler::user_list,
             handler::user_handler::list_roles,
 
@@ -126,6 +128,7 @@ async fn main() -> std::io::Result<()> {
                 SessionMiddleware::builder(CookieSessionStore::default(), session_key.clone())
                         .cookie_secure(false)
                         .cookie_name("_r_session_".to_string())
+                        .session_lifecycle(PersistentSession::default())
                         .build()
             )
             .wrap(IdentityMiddleware::default())

@@ -26,6 +26,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
     let scope = web::scope("/api")
             .route("/health-check", web::get().to(health_check))
             .service(web::scope("/user")
+                .route("", web::get().to(user_handler::user_auth_model))
                 .route("/login", web::post().to(user_handler::user_login))
                 .route("/register", web::post().to(user_handler::user_register))
                 .route("/logout", web::get().to(user_handler::user_logout))

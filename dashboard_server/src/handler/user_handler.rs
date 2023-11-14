@@ -1,3 +1,5 @@
+use std::process::id;
+
 use super::prelude::*;
 use actix_web::{HttpRequest, HttpMessage};
 use argon2::{self};
@@ -50,8 +52,8 @@ pub async fn user_register(body: web::Json<UserRegisterSchema>,
         } 
     }
 
-
 }
+
 
 #[utoipa::path(
     post,
@@ -173,4 +175,21 @@ pub async fn list_roles() -> ServerResponse {
             },
         ]
     ))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/user",
+    responses(
+        (status = 200, body = UserModel),
+        (status = 400, body = ErrorModel),
+    )
+)]
+pub async fn user_auth_model(identity: Identity,
+                        data: web::Data<AppState>) -> ServerResponse {
+
+    let user_id: i32 = identity.id().unwrap().parse().unwrap();
+    let user = UserModel::find_by_id(&data.db, user_id).await?;
+
+    Ok(HttpResponse::Ok().json(user))
 }

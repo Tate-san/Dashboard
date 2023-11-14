@@ -80,7 +80,7 @@
     <Input id="search-navbar" class="max-h-[2rem] max-w-[15rem]" placeholder="&#xF002; Search..." />
 
     <NavUl {activeUrl} ulClass="text-md">
-    {#if $auth_store.isLogged}
+    {#if $auth_store.isLoggedin}
       <NavLi class="cursor-pointer text-white !hover:text-orange-600 whitespace-nowrap">
         {$auth_store.username}<ChevronDownOutline class="w-3 h-3 ml-2 inline" />
       </NavLi>
@@ -96,28 +96,25 @@
       <NavLi class="cursor-pointer text-white !hover:text-orange-600 whitespace-nowrap">
         Not logged in<ChevronDownOutline class="w-3 h-3 ml-2 inline" />
       </NavLi>
-      <Dropdown class="w-80 z-20 bg-slate-900" on:show={() => isLoginInvalid = false}>
-          <div class="w-full h-fit flex flex-col p-2 gap-2">
+      <Dropdown class="w-96 z-20 bg-secondary-300 border-secondary-200 border rounded-md" on:show={() => isLoginInvalid = false}>
+          <div class="w-full h-fit flex flex-col px-12 py-4 gap-2 items-center">
             {#if isLoginInvalid}
             <Alert color="red">
               <InfoCircleSolid slot="icon" class="w-4 h-4" />
               <span class="font-small">Invalid username or password!</span>
             </Alert>
             {/if}
-            <!-- <Label for="username">Username:</Label> -->
-            
-            <div class="flex">
+            <div class="flex w-full">
               <i class="fa-solid fa-user m-2 text-white"></i>
-              <Input class="h-8 w-64 m-0.5" id="username" placeholder="Username" bind:value={loginForm.username}/>
+              <Input class="h-8 w-full m-0.5" id="username" placeholder="Username" bind:value={loginForm.username}/>
             </div>
             
-            <!-- <Label for="password">Password:</Label> -->
-            <div class="flex">
+            <div class="flex w-full">
               <i class="fa-solid fa-lock m-2 text-white"></i>
-              <Input class="h-8 w-64 m-0.5" id="password" type="password" placeholder="Password" bind:value={loginForm.password}/>
+              <Input class="h-8 w-full m-0.5" id="password" type="password" placeholder="Password" bind:value={loginForm.password}/>
             </div>
             
-            <Button class="w-fit self-center" on:click={onLoginUser}>Sign in</Button>
+            <Button class="w-fit" on:click={onLoginUser}>Sign in</Button>
             <A class="font-medium hover:underline" on:click={() => {registerState.modal = true; registerState.isInvalid = false;}}>Create new account</A>
           </div>
       </Dropdown>
