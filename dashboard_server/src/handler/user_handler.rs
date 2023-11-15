@@ -115,8 +115,7 @@ pub async fn user_login(request: HttpRequest,
         (status = 401),
     )
 )]
-pub async fn user_list(data: web::Data<AppState>,
-                        _: Identity) -> ServerResponse {
+pub async fn user_list(data: web::Data<AppState>) -> ServerResponse {
     let users = UserModel::list(&data.db).await?; 
     Ok(HttpResponse::Ok().json(users))
 }

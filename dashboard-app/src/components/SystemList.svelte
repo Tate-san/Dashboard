@@ -42,8 +42,9 @@
 
 </script>
 
-
-<Button on:click={() => {openAddSystemModal = true}}>Add system</Button>
+{#if $auth_store.isLoggedin}
+    <Button on:click={() => {openAddSystemModal = true}}>Add system</Button>
+{/if}
 
 <Accordion multiple activeClass="bg-primary-900 text-secondary-50" inactiveClass="bg-secondary-800 hover:bg-primary-800 text-secondary-50">
     {#each $userList as user}

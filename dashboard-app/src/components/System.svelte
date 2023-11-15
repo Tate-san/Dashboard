@@ -8,6 +8,7 @@
     export let onSystemDelete = () => {};
     export let system = {};
     let dropdownOpen = false;
+    $: isOwner = system.owner_id && (system.owner_id === $auth_store.id) || 0;
 
     function systemDelete(){
         if(!system) return;
@@ -44,7 +45,7 @@
       <h4 class="text-xl font-bold w-[90%]">{system.name}</h4>
       <p>{system.description}</p>
     </div>
-    {#if system.owner_id === $auth_store.id}
+    {#if isOwner}
       <DotsHorizontalOutline class="text-white absolute top-2 right-2 z-50" />
       <Dropdown bind:open={dropdownOpen} class="bg-secondary-700 rounded-lg text-white border border-secondary-800">
         <DropdownItem defaultClass="font-medium py-2 px-4 text-sm hover:bg-secondary-900">Edit</DropdownItem>
