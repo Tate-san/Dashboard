@@ -50,7 +50,7 @@ pub async fn system_new(body: web::Json<SystemNewSchema>,
         ));
     }
 
-    let new_system = SystemModel:: new(body.name.clone(), 
+    let new_system = SystemModel::new(body.name.clone(), 
                                                     body.description.clone(), 
                                                     owner_id 
                                                 );

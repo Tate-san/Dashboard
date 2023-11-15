@@ -1,7 +1,6 @@
 <script>
-    import { InfoCircleSolid } from "flowbite-svelte-icons";
     import { login } from "../hooks/auth";
-    import { A, Alert, Button, Input } from "flowbite-svelte";
+    import { A, Button, Input } from "flowbite-svelte";
     import { addToast } from "../hooks/toast";
 
     export let onRegister = () => {}

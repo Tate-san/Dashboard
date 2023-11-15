@@ -5,6 +5,29 @@ export const system = {
     description: ""
 }
 
+export async function getSystemListByUsers() {
+    return apiRequest("get", `/system/list`, null)
+    .then((systems) => {
+
+        return apiRequest("get", `/user/list`, null)
+        .then((users) => {
+            return Promise.resolve(users.map((user) => {
+                return {
+                    ...user,
+                    systems: systems.filter((system) => system.owner_id === user.user_id)
+                } 
+            }));
+        })
+        .catch((e) => {
+            return Promise.reject(e);
+        })
+
+    })
+    .catch((e) => {
+        return Promise.reject(e);
+    })
+}
+
 export async function getSystemList() {
     return apiRequest("get", `/system/list`, null)
     .then((data) => {
