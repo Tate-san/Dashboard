@@ -34,6 +34,11 @@ pub async fn system_new(body: web::Json<SystemNewSchema>,
                         identity: Identity,
                         data: web::Data<AppState>) -> ServerResponse {
 
+    if body.0.name.is_empty() {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!(ResponseError::SystemNameEmpty.get_error())));
+    }
+
     let owner_id: i32 = identity.id().unwrap().parse().unwrap();
 
     if let Ok(_) = SystemModel::find_by_name_and_user_id(&data.db, 

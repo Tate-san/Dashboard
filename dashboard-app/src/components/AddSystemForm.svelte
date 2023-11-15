@@ -2,6 +2,7 @@
     import { Button, Input, Modal } from "flowbite-svelte";
     import { addSystem, system } from '../hooks/systems';
     import { writable } from "svelte/store";
+    import { addToast } from "../hooks/toast";
 
     export let clear = false;
     export let onSystemAdded = () => {};
@@ -13,6 +14,13 @@
       addSystem(newSystem)
       .then(() => {
         onSystemAdded();
+      })
+      .catch((e) => {
+        addToast({
+            message: e.message,
+            dismissable: false,
+            type: "error"
+        });
       });
     }
 

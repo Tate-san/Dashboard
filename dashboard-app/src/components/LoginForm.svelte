@@ -26,6 +26,7 @@
 
             addToast({
                 message: e.message,
+                dismissable: false,
                 type: "error"
             });
         })
