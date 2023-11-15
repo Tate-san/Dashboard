@@ -63,7 +63,7 @@
 </div>
 
 <Modal bind:open={openRegisterModal} size="xs" autoclose={false} class="w-full bg-secondary-800">
-  <RegisterForm/>
+  <RegisterForm onUserRegistered={() => {openRegisterModal = false}}/>
 </Modal>
 
 <style lang="scss">
