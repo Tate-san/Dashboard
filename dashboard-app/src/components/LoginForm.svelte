@@ -2,26 +2,28 @@
     import { InfoCircleSolid } from "flowbite-svelte-icons";
     import { login } from "../hooks/auth";
     import { A, Alert, Button, Input } from "flowbite-svelte";
+    import { addToast } from "../hooks/toast";
 
     export let onRegister = () => {}
     export let clear = false;
     $: clear && clearInput();
 
+    let isLoginInvalid = false;
     let loginForm = {
         username: "",
         password: ""
     }
 
-    let isLoginInvalid = false;
 
     function onLoginUser(){
 
         login(loginForm.username, loginForm.password).then((a) => {
-            isLoginInvalid = false;
-            loginForm = {
-                username: "",
-                password: "",
-            }
+            clearInput();
+
+            addToast({
+                message: "Logged in",
+                type: "success"
+            });
         }).catch((e) => {
             isLoginInvalid = true;
         })

@@ -2,7 +2,9 @@
     import { Alert, Button, Input } from "flowbite-svelte";
     import { InfoCircleSolid } from "flowbite-svelte-icons";
     import { auth_store, login, logout, register }  from "../hooks/auth";
+    import { addToast } from "../hooks/toast";
 
+    export let onUserRegistered = () => {}; 
     export let clear = false;
     $: clear && clearInput();
 
@@ -20,7 +22,13 @@
         registerState.isInvalid = false;
 
         register(registerForm.username, registerForm.password).then(() => {
-            clearInput();
+            onUserRegistered();
+
+            addToast({
+                message: "Successfully registered",
+                type: "success"
+            });
+            
         }).catch((e) => {
             registerState.isInvalid = true;
             registerState.errorMessage = e.response.data.message;
