@@ -20,6 +20,7 @@ export const apiRequest = (method, url, body) => {
         return Promise.resolve(res.data);
     })
     .catch((e) => {
+        if(e.response && e.response.data) return Promise.reject(e.response.data)
         return Promise.reject(e);
     });
 };
