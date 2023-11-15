@@ -1,21 +1,7 @@
 <script>
     import { Sidebar, SidebarGroup, SidebarItem, SidebarWrapper, SidebarDropdownItem, SidebarDropdownWrapper, Modal, Input, Button } from 'flowbite-svelte';
     import { ChartPieSolid, GridSolid, ShoppingCartSolid, MailBoxSolid, UserSolid, ArrowRightToBracketSolid, FileEditSolid, PlusOutline } from 'flowbite-svelte-icons';
-    import { addSystem, system } from '../hooks/systems';
 
-    let open = false;
-
-    function openModal()
-    {
-      open = !open;
-    }
-
-    let newSystem = system;
-
-    function saveSystem()
-    {
-      addSystem(newSystem);
-    }
 </script>
   
 <Sidebar color="green">
@@ -59,14 +45,3 @@
   </SidebarWrapper>
 </Sidebar>
 
-<Modal bind:open={open} size="xs" autoclose={true} class="w-full bg-secondary-800">
-  <div class="flex w-full">
-    <i class="fa-solid fa-microchip m-2 text-white"></i>
-    <Input class="h-8 w-full m-0.5" id="name" placeholder="Name" bind:value={newSystem.name}/>
-  </div>
-  <div class="flex w-full">
-    <i class="fa-solid fa-bars-staggered m-2 text-white"></i>
-    <Input class="h-8 w-full m-0.5" id="description" placeholder="Description" bind:value={newSystem.description}/>
-  </div>
-  <Button class="w-full1" on:click={saveSystem}>Save system</Button>
-</Modal>

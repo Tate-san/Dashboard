@@ -8,7 +8,9 @@
 
 </script>
 
-<div class="!bg-secondary-700 w-screen h-screen">
+<header class="sticky top-0">
     <Navbar />
+</header>
+<body class="!bg-secondary-700 w-screen h-screen overflow-hidden">
     <slot />
-</div>
+</body>
