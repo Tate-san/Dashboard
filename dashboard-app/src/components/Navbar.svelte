@@ -1,14 +1,14 @@
 <script>
   import { Navbar, NavBrand, NavLi, NavUl,
             Dropdown, DropdownItem, DropdownDivider, 
-            Input, Label, Button, Alert, A,
-            Modal} from 'flowbite-svelte';
+            Input, Label, Button, Alert, A } from 'flowbite-svelte';
   import { ChevronDownOutline } from 'flowbite-svelte-icons';
   import { page } from '$app/stores';
   import { InfoCircleSolid } from 'flowbite-svelte-icons';
   import RegisterForm from './RegisterForm.svelte';
   import { auth_store, logout } from '../hooks/auth';
   import LoginForm from './LoginForm.svelte';
+  import Modal from "./Modal.svelte";
 
   $: activeUrl = $page.url.pathname;
 

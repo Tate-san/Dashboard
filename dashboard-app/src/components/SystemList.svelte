@@ -1,5 +1,5 @@
 <script>
-    import { Accordion, AccordionItem, Button, Modal } from "flowbite-svelte";
+    import { Accordion, AccordionItem, Button} from "flowbite-svelte";
     import { deleteSystem, getSystemListByUsers } from "../hooks/systems";
     import { onMount } from "svelte";
     import { writable } from "svelte/store";
@@ -7,6 +7,7 @@
     import { auth_store } from "../hooks/auth";
     import AddSystemForm from "./AddSystemForm.svelte";
     import System from "./System.svelte";
+    import Modal from "./Modal.svelte";
 
     let userList = writable([]);
     let openAddSystemModal = false;
