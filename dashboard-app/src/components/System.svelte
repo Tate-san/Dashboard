@@ -8,7 +8,7 @@
     export let onSystemDelete = () => {};
     export let system = {};
     let dropdownOpen = false;
-    $: isOwner = system.owner_id && (system.owner_id === $auth_store.id) || 0;
+    $: isOwner = system.owner_id && (system.owner_id === $auth_store.id);
 
     function systemDelete(){
         if(!system) return;

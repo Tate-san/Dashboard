@@ -65,11 +65,5 @@ export async function register(username, password) {
     return apiRequest("post", "/user/register", {
         username,
         password
-    })
-    .then((data) => {
-        return Promise.resolve(data);
-    })
-    .catch((e) => {
-        return Promise.reject(e);
     });
 }
