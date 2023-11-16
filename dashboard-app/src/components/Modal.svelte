@@ -29,9 +29,10 @@
         bind:defaultClass
         bind:backdropClass
         dismissable={false} 
-        class="w-full bg-secondary-900">
+        class="w-full bg-secondary-900 text-white" 
+        color="none">
     {#if dismissable}
-        <Button class="!p-2 z-10 absolute top-2 right-2 bg-transparent hover:bg-secondary-50 hover:text-secondary-700" on:click={closeModal}>
+        <Button class="!p-2 z-10 absolute top-4 right-3 bg-transparent hover:bg-secondary-50 hover:text-secondary-700" on:click={closeModal}>
             <CloseOutline class="w-3 h-3" />
         </Button>
     {/if}

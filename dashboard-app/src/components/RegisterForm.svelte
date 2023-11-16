@@ -43,7 +43,6 @@
 </script>
 
 <form class="flex flex-col space-y-6" on:submit={onRegisterUser}>
-    <h3 class="mb-4 text-xl font-medium text-white">Register</h3>
     {#if registerState.isInvalid}
         <Alert color="red">
         <InfoCircleSolid slot="icon" class="w-4 h-4" />

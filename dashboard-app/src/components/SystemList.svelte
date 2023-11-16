@@ -65,7 +65,7 @@
     {/each}
 </Accordion>
 
-<Modal bind:open={openAddSystemModal} size="xs" autoclose={false} class="w-full bg-secondary-900">
+<Modal title="Create system" bind:open={openAddSystemModal} size="xs">
   <AddSystemForm bind:clear={openAddSystemModal} onSystemAdded={() => {
     openAddSystemModal = false;
     fetchSystemList();
