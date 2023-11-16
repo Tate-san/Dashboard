@@ -39,7 +39,7 @@
 {#if system}
   <div class="relative flex flex-col max-w-[36rem] gap-1 
       bg-secondary-800 hover:bg-secondary-950 border 
-      border-secondary-900 hover:border-ming-400 rounded-lg 
+      border-secondary-900 hover:border-primary-400 rounded-lg 
       text-white cursor-pointer">
     <div class="z-10 px-8 py-4" on:click={systemOpen} on:keypress={systemOpen} role="button" tabindex="0">
       <h4 class="text-lg font-bold w-[90%] underline">{system.name}</h4>

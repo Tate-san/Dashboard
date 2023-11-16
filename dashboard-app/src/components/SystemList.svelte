@@ -44,7 +44,7 @@
 </script>
 
 {#if $auth_store.isLoggedin}
-    <Button on:click={() => {openAddSystemModal = true}} class="bg-ming-600 my-2 mx-2 hover:bg-ming-800">
+    <Button on:click={() => {openAddSystemModal = true}} class="my-2 mx-2">
         <i class="fa-solid fa-plus mr-3"></i>    
         New system
     </Button>

@@ -40,5 +40,5 @@
     <i class="fa-solid fa-bars-staggered m-2 text-white"></i>
     <Input class="h-8 w-full m-0.25 text-xs" id="description" placeholder="Description" bind:value={newSystem.description}/>
   </div>
-  <Button type="submit" class="w-full1 bg-ming-800 hover:bg-ming-600">Save system</Button>
+  <Button type="submit" class="w-full1">Save system</Button>
 </form>
