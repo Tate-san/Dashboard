@@ -38,18 +38,18 @@
 
 {#if system}
   <div class="relative flex flex-col max-w-[36rem] gap-1 
-      bg-secondary-800 hover:bg-primary-950 border 
-      border-secondary-900 hover:border-primary-700 rounded-lg 
+      bg-secondary-800 hover:bg-secondary-950 border 
+      border-secondary-900 hover:border-ming-400 rounded-lg 
       text-white cursor-pointer">
     <div class="z-10 px-8 py-4" on:click={systemOpen} on:keypress={systemOpen} role="button" tabindex="0">
-      <h4 class="text-xl font-bold w-[90%]">{system.name}</h4>
-      <p>{system.description}</p>
+      <h4 class="text-lg font-bold w-[90%] underline">{system.name}</h4>
+      <p class="text-xs">{system.description}</p>
     </div>
     {#if isOwner}
-      <DotsHorizontalOutline class="text-white absolute top-2 right-2 z-50" />
+      <DotsHorizontalOutline class="text-white absolute top-0.5 right-1 z-50" />
       <Dropdown bind:open={dropdownOpen} class="bg-secondary-700 rounded-lg text-white border border-secondary-800">
-        <DropdownItem defaultClass="font-medium py-2 px-4 text-sm hover:bg-secondary-900">Edit</DropdownItem>
-        <DropdownItem on:click={systemDelete} defaultClass="font-medium py-2 px-4 text-sm hover:bg-secondary-900">Delete</DropdownItem>
+        <DropdownItem defaultClass="font-medium py-2 px-4 text-xs hover:bg-secondary-900">Edit</DropdownItem>
+        <DropdownItem on:click={systemDelete} defaultClass="font-medium py-2 px-4 text-xs hover:bg-secondary-900">Delete</DropdownItem>
       </Dropdown>
     {/if}
   </div>
