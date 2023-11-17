@@ -31,25 +31,26 @@ pub struct DeviceListModel {
     pub device_id: i32,
     pub owner_id: i32,
     pub name: String,
+    pub topic: String,
 }
 
 impl DeviceListModel {
     pub async fn get_all_devices(conn: &sqlx::Pool<Postgres>) -> DatabaseResult<Vec<DeviceListModel>> {
-        sqlx::query_as!(DeviceListModel, r#"SELECT device_id,owner_id,name FROM devices"#)
+        sqlx::query_as!(DeviceListModel, r#"SELECT device_id,owner_id,name,topic FROM devices"#)
             .fetch_all(conn)
             .await
             .map_err(|err| err.into())
     }
 
     pub async fn get_user_devices(conn: &sqlx::Pool<Postgres>, user_id: i32) -> DatabaseResult<Vec<DeviceListModel>> {
-        sqlx::query_as!(DeviceListModel, r#"SELECT device_id,owner_id,name FROM devices WHERE owner_id = $1"#, user_id)
+        sqlx::query_as!(DeviceListModel, r#"SELECT device_id,owner_id,name,topic FROM devices WHERE owner_id = $1"#, user_id)
             .fetch_all(conn)
             .await
             .map_err(|err| err.into())
     }
 
     pub async fn find_by_name_and_user_id(conn: &sqlx::Pool<Postgres>, name: &str, user_id: i32) -> DatabaseResult<DeviceListModel> {
-        sqlx::query_as!(DeviceListModel, r#"SELECT device_id,owner_id,name FROM devices WHERE name = $1 and owner_id = $2"#, name, user_id)
+        sqlx::query_as!(DeviceListModel, r#"SELECT device_id,owner_id,name,topic FROM devices WHERE name = $1 and owner_id = $2"#, name, user_id)
             .fetch_one(conn)
             .await
             .map_err(|err| err.into())

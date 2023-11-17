@@ -8,14 +8,21 @@
     import AddDeviceForm from "./AddDeviceForm.svelte"
     import Device from "./Device.svelte"
     import Modal from "./Modal.svelte";
+    import { goto } from '$app/navigation';
 
     let deviceList = writable([]);
     let openAddDeviceModal = false;
 
     function fetchDeviceList(){
+        if(!$auth_store.isLoggedin) {
+            window.location.href = "/"; 
+            return;
+        }
+
         getDeviceList()
         .then((data) => {
             deviceList.set(data);
+            console.log(data)
         })
         .catch((e) => {
             addToast({
@@ -27,6 +34,9 @@
 
     onMount(() => {
         fetchDeviceList(); 
+        auth_store.subscribe(() => {
+            fetchDeviceList();
+        });
     });
 
 </script>
