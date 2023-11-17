@@ -10,4 +10,3 @@
     <SystemList />
   </div>
 </MainLayout>
-
