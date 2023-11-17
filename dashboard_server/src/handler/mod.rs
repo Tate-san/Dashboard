@@ -44,6 +44,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
             )
             .service(web::scope("/system")
                 .route("", web::post().to(system_handler::system_new))
+                .route("/{system_id}", web::patch().to(system_handler::system_update))
                 .route("/list", web::get().to(system_handler::system_list))
                 .route("/{system_id}/user/{user_id}", web::post().to(system_handler::system_add_user))
                 .route("/{system_id}/user/{user_id}", web::delete().to(system_handler::system_delete_user))

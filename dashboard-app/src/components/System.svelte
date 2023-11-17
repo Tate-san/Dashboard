@@ -4,10 +4,14 @@
     import { addToast } from "../hooks/toast";
     import { auth_store } from "../hooks/auth";
     import { DotsHorizontalOutline } from "flowbite-svelte-icons";
+    import Modal from "./Modal.svelte";
+    import EditSystemForm from "./EditSystemForm.svelte";
 
-    export let onSystemDelete = () => {};
+    export let onSystemChanged = () => {};
     export let system = {};
+    let editSystem = {};
     let dropdownOpen = false;
+    let openEditModal = false;
     $: isOwner = system.owner_id && (system.owner_id === $auth_store.id) || 0;
 
     function systemDelete(){
@@ -15,11 +19,8 @@
 
         deleteSystem(system.system_id)
         .then(() => {
-          onSystemDelete();
-          addToast({
-              message: "System successfully deleted",
-              type: "success"
-          });
+          onSystemChanged();
+          openEditModal = false;
         })
         .catch((e) => {
           addToast({
@@ -28,6 +29,20 @@
           })
         });
         dropdownOpen = false;
+    }
+
+    function onEditSystem(){
+      editSystem.system_id = system.system_id;
+      editSystem.name = system.name;
+      editSystem.description = system.description;
+
+      openEditModal = true;
+    }
+
+    function onSystemEdited(){
+      openEditModal = false;
+      onSystemChanged();
+
     }
 
     function systemOpen(){
@@ -48,9 +63,13 @@
     {#if isOwner}
       <DotsHorizontalOutline class="text-white absolute top-0.5 right-1 z-50" />
       <Dropdown bind:open={dropdownOpen} class="bg-secondary-700 rounded-lg text-white border border-secondary-800">
-        <DropdownItem defaultClass="font-medium py-2 px-4 text-xs hover:bg-secondary-900">Edit</DropdownItem>
+        <DropdownItem on:click={onEditSystem} defaultClass="font-medium py-2 px-4 text-xs hover:bg-secondary-900">Edit</DropdownItem>
         <DropdownItem on:click={systemDelete} defaultClass="font-medium py-2 px-4 text-xs hover:bg-secondary-900">Delete</DropdownItem>
       </Dropdown>
     {/if}
   </div>
 {/if}
+
+<Modal bind:open={openEditModal} size="xs" title="Edit system">
+  <EditSystemForm bind:system={editSystem} onSystemEdited={onSystemEdited} />
+</Modal>

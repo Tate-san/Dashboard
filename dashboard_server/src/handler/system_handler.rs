@@ -106,6 +106,59 @@ pub async fn system_delete(query: web::Path<SystemDeleteQuery>,
         Err(error) => Err(error.into())
     }
 
+    
+}
+#[utoipa::path(
+    patch,
+    path = "/api/system/{system_id}",
+    request_body = SystemNewSchema,
+    responses(
+        (status = 200),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    ),
+    params(
+            ("system_id" = i32, Path, description = ""),
+        )
+)]
+pub async fn system_update(body: web::Json<SystemNewSchema>, 
+                        query: web::Path<SystemQuery>,
+                        identity: Identity,
+                        data: web::Data<AppState>) -> ServerResponse {
+
+    if body.0.name.is_empty() {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!(ResponseError::SystemNameEmpty.get_error())));
+    }
+
+    let owner_id: i32 = identity.id().unwrap().parse().unwrap();
+
+    if let Err(_) = SystemModel::find_by_id(&data.db, query.system_id).await {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!(ResponseError::SystemDoesntExist.get_error())
+        ));
+    }
+
+    if let Ok(found_system) = SystemModel::find_by_name_and_user_id(&data.db, 
+                                                        body.name.clone(),
+                                                        owner_id
+                                                        ).await {
+        if query.system_id != found_system.system_id {
+            return Ok(HttpResponse::BadRequest().json(
+                serde_json::json!(ResponseError::SystemAlreadyExists.get_error())
+            ));
+        }
+    }
+
+    let new_system = SystemModel::new(body.name.clone(), 
+                                                    body.description.clone(), 
+                                                    0);
+                    
+    match new_system.update(&data.db, query.system_id).await {
+        Ok(_) => Ok(HttpResponse::Ok().finish()),
+        Err(error) => Err(error.into())
+    }
+
 }
 
 #[utoipa::path(

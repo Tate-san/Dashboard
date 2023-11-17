@@ -1,6 +1,6 @@
 <script>
     import { Accordion, AccordionItem, Button} from "flowbite-svelte";
-    import { deleteSystem, getSystemListByUsers } from "../hooks/systems";
+    import { getSystemListByUsers } from "../hooks/systems";
     import { onMount } from "svelte";
     import { writable } from "svelte/store";
     import { addToast } from "../hooks/toast";
@@ -25,18 +25,6 @@
         })
     }
 
-    function onSystemDelete(id){
-        deleteSystem(id)
-        .then(() => {
-            fetchSystemList();
-
-            addToast({
-                message: "System successfully deleted",
-                type: "success"
-            });
-        });
-    }
-
     onMount(() => {
         fetchSystemList(); 
     });
@@ -57,7 +45,7 @@
                 <span slot="header" class="text-sm font-regular font-sans">{user.username}'s systems</span>
                     <div class="flex flex-row gap-8 flex-wrap w-full">
                         {#each user.systems as system}
-                            <System bind:system onSystemDelete={fetchSystemList} />
+                            <System bind:system onSystemChanged={fetchSystemList} />
                         {/each}
                     </div>
             </AccordionItem>

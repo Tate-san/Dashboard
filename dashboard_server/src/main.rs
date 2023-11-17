@@ -56,6 +56,7 @@ async fn main() -> std::io::Result<()> {
 
             handler::system_handler::system_new,
             handler::system_handler::system_delete,
+            handler::system_handler::system_update,
             handler::system_handler::system_list,
             handler::system_handler::system_add_user,
             handler::system_handler::system_delete_user,

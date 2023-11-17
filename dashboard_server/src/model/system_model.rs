@@ -64,6 +64,16 @@ impl SystemModel {
             .map_err(|err| err.into())
     }
 
+    pub async fn update(&self, conn: &sqlx::Pool<Postgres>, system_id: i32) -> DatabaseResult<PgQueryResult> {
+        sqlx::query(r#"UPDATE systems SET name = $1, description = $2 WHERE system_id = $3"#)
+            .bind(&self.name)
+            .bind(&self.description)
+            .bind(system_id)
+            .execute(conn)
+            .await
+            .map_err(|err| err.into())
+    }
+
     pub async fn delete(conn: &sqlx::Pool<Postgres>, system_id: i32) -> DatabaseResult<PgQueryResult> {
         sqlx::query(r#"DELETE FROM systems WHERE system_id = $1"#)
             .bind(system_id)
