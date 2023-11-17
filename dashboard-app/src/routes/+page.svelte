@@ -8,4 +8,3 @@
     <SystemList />
   </div>
 </MainLayout>
-

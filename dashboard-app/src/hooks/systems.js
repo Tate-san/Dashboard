@@ -39,6 +39,17 @@ export async function addSystem(new_system) {
 export async function deleteSystem(system_id) {
     return apiRequest("delete", `/system/${system_id}`, null);
 }
+
+export async function updateSystem(updated_system, system_id) {
+    return apiRequest("patch", `/system/${system_id}`, updated_system)
+    .then((data) => {
+        return Promise.resolve(data);
+    })
+    .catch((e) => {
+        return Promise.reject(e);
+    })
+}
+
 export async function getUsersInSystem(system_id) {
     return apiRequest("get", `/system/${system_id}/user/list`, null);
 }

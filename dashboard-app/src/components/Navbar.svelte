@@ -45,6 +45,7 @@
         
       <Dropdown class="w-44 z-20 bg-secondary-800 text-secondary-200 border border-secondary-600 rounded-lg">
         <DropdownItem class="hover:text-primary-400 hover:bg-secondary-800" href="/">Dashboard</DropdownItem>
+        <DropdownItem class="hover:text-primary-400 hover:bg-secondary-800" href="/device">Manage devices</DropdownItem>
         <DropdownItem class="hover:text-primary-400 hover:bg-secondary-800" href="/docs/components/navbar">Settings</DropdownItem>
         <DropdownItem class="hover:text-primary-400 hover:bg-secondary-800" href="/">Earnings</DropdownItem>
         <DropdownDivider />
