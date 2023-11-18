@@ -25,3 +25,12 @@ export async function addDevice(new_device) {
         return Promise.reject(e);
     })
 }
+
+export async function deleteDevice(device_id) {
+    return apiRequest("delete", `/device/${device_id}`, null);
+}
+
+export async function updateDevice()
+{
+    // TODO
+}
