@@ -64,6 +64,7 @@ async fn main() -> std::io::Result<()> {
 
             handler::device_handler::device_new,
             handler::device_handler::device_delete,
+            handler::device_handler::device_update,
             handler::device_handler::device_list,
             handler::device_handler::get_device,
             handler::device_handler::device_insert_structure,
@@ -78,6 +79,8 @@ async fn main() -> std::io::Result<()> {
 
                 schema::device_schema::DeviceNewSchema,
                 schema::device_schema::DeviceStructureNewSchema,
+                schema::device_schema::DeviceUpdateSchema,
+                schema::device_schema::DeviceStructureUpdateSchema,
                 model::device_model::DeviceModel,
                 model::device_model::DeviceListModel,
                 model::device_model::DeviceStructureModel,

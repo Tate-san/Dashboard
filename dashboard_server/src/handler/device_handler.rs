@@ -1,6 +1,15 @@
 use crate::{
-    schema::device_schema::{DeviceNewSchema, DeviceStructureNewSchema}, 
-    model::{DeviceModel, DeviceListModel, DeviceStructureModel}
+    schema::device_schema::{
+        DeviceNewSchema, 
+        DeviceStructureNewSchema, 
+        DeviceUpdateSchema, 
+        DeviceStructureUpdateSchema
+    }, 
+    model::{
+        DeviceModel, 
+        DeviceListModel, 
+        DeviceStructureModel
+    }
 };
 use super::prelude::*;
 
@@ -98,6 +107,81 @@ pub async fn device_delete(query: web::Path<DeviceDeleteQuery>,
         Ok(_) => Ok(HttpResponse::Ok().finish()),
         Err(error) => Err(error.into())
     }
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/device/{device_id}",
+    request_body = DeviceUpdateSchema,
+    responses(
+        (status = 200),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    ),
+    params(
+            ("device_id" = i32, Path, description = ""),
+        )
+)]
+pub async fn device_update(body: web::Json<DeviceUpdateSchema>, 
+                        query: web::Path<DeviceGetQuery>,
+                        identity: Identity,
+                        data: web::Data<AppState>) -> ServerResponse {
+
+    let user_id: i32 = identity.id().unwrap().parse().unwrap();
+
+    let device = match DeviceModel::find_by_id(&data.db, query.device_id).await {
+        Ok(device) => device,
+        Err(_) => return Ok(HttpResponse::BadRequest().json(
+                    serde_json::json!(ResponseError::DeviceDoesntExist.get_error())))
+    };
+
+    if let Ok(found) = DeviceListModel::find_by_name_and_user_id(&data.db, &body.name, user_id).await {
+        if found.device_id != device.device_id {
+            return Ok(HttpResponse::BadRequest().json(
+                serde_json::json!(ResponseError::DeviceAlreadyExists.get_error())));
+        }
+    }
+
+    if device.owner_id != user_id {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!(ResponseError::DeviceNotOwner.get_error())));
+    }
+
+    let new_device = DeviceModel::new(body.name.clone(), body.topic.clone(), user_id);
+    new_device.update(&data.db, query.device_id).await?;
+
+    let current_structure = DeviceStructureModel::all_by_device_id(&data.db, query.device_id).await?;
+    let mut updated_structure = body.0.structure;
+
+    // Delete unused structures
+    for current in current_structure.iter() {
+        if updated_structure.iter().any(|x| x.devicestructure_id == current.devicestructure_id) {
+            continue;
+        }
+
+        DeviceStructureModel::delete(&data.db, current.devicestructure_id).await?;
+    }
+
+    // Iterate through updated and edit or add missing
+    for updated in updated_structure.iter() {
+        if let Some(existing) = current_structure.iter().find(|x| x.devicestructure_id == updated.devicestructure_id) {
+            let new_updated = DeviceStructureModel::new(0, 
+                                                                    updated.real_name.clone(), 
+                                                                    updated.alias_name.clone(), 
+                                                                    updated.data_type.clone());
+            new_updated.update(&data.db, updated.devicestructure_id).await?;
+        }
+        else {
+            let new_structure = DeviceStructureModel::new(device.device_id, 
+                                                                        updated.real_name.clone(), 
+                                                                        updated.alias_name.clone(), 
+                                                                        updated.data_type.clone());
+            new_structure.insert(&data.db).await?;
+        }
+    }
+
+
+    Ok(HttpResponse::Ok().finish())
 }
 
 #[utoipa::path(

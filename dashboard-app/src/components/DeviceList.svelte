@@ -22,7 +22,6 @@
         getDeviceList()
         .then((data) => {
             deviceList.set(data);
-            console.log(data)
         })
         .catch((e) => {
             addToast({
@@ -42,15 +41,17 @@
 </script>
 
 {#if $auth_store.isLoggedin}
-    <Button on:click={() => {openAddDeviceModal = true}} class="bg-ming-600 my-2 mx-2 hover:bg-ming-800">
+    <Button on:click={() => {openAddDeviceModal = true}} class="my-2 mx-2">
         <i class="fa-solid fa-plus mr-3"></i>    
         New device
     </Button>
 {/if}
 
+<div class="flex flex-row flex-wrap gap-x-4 gap-y-2">
 {#each $deviceList as device}
     <Device bind:device onDeviceChanged={fetchDeviceList} />
 {/each}
+</div>
 
 <Modal title="Create device" bind:open={openAddDeviceModal} size="xs">
     <AddDeviceForm bind:clear={openAddDeviceModal} onDeviceAdded={() => {

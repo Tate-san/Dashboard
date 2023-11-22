@@ -1,16 +1,22 @@
 <script>
-    import { Button, Input, Modal } from "flowbite-svelte";
-    import { updateDevice } from '../hooks/devices';
+    import { Button, Input, Modal, Select } from "flowbite-svelte";
+    import { getDevice, updateDevice, device as deviceObj, structureValue, structureDataTypes } from '../hooks/devices';
     import { writable } from "svelte/store";
     import { addToast } from "../hooks/toast";
     import { dev } from "$app/environment";
 
     export let onDeviceEdited = () => {};
-    export let device = writable({});
+    export let device = {};
+    export let newDevice = writable({...deviceObj});
+    export let open = false;
+
+    $: open && onOpen();
 
     function saveDevice()
     {
-      updateDevice()
+      if(!device || !device.device_id) return;
+
+      updateDevice(device.device_id, $newDevice)
       .then(() => {
         onDeviceEdited();
       })
@@ -23,16 +29,50 @@
       });
     }
 
+    function onOpen(){
+      getDevice(device.device_id)
+      .then((data) => {
+        newDevice.set({...data});
+      });
+    }
+    
+    function onAddStructureItem(){
+      newDevice.set({
+        ...$newDevice,
+        structure: [...$newDevice.structure, {...structureValue}]
+      });
+    }
+
+    function onDeleteStructureItem(idx){
+      $newDevice.structure.splice(idx, 1);
+      newDevice.set({
+        ...$newDevice,
+      });
+    }
+
 </script>
 
 <form class="flex flex-col space-y-6" on:submit={saveDevice}>
   <div class="flex w-full">
     <i class="fa-solid fa-microchip m-2 text-white"></i>
-    <Input class="h-8 w-full m-0.25 text-xs" id="name" placeholder="Name" bind:value={device.name}/>
+    <Input class="h-8 w-full m-0.25 text-xs" id="name" placeholder="Name" bind:value={$newDevice.name}/>
   </div>
   <div class="flex w-full">
     <i class="fa-solid fa-bars-staggered m-2 text-white"></i>
-    <Input class="h-8 w-full m-0.25 text-xs" id="description" placeholder="Topic" bind:value={device.topic}/>
+    <Input class="h-8 w-full m-0.25 text-xs" id="description" placeholder="Topic" bind:value={$newDevice.topic}/>
+  </div>
+  <Button on:click={onAddStructureItem}>AddStructure</Button>
+  <div class="flex flex-col w-full gap-2">
+    {#if $newDevice.structure}
+    {#each $newDevice.structure as structure, i}
+      <div class="flex flex-row w-full gap-1">
+        <Input bind:value={structure.real_name} class="h-8 w-full m-0.25 text-xs" />
+        <Input bind:value={structure.alias_name} class="h-8 w-full m-0.25 text-xs" />
+        <Select bind:value={structure.data_type} items={structureDataTypes} class="h-8 w-full m-0.25 text-xs" />
+        <Button class="w-4 bg-red-500 hover:bg-red-700" on:click={() => onDeleteStructureItem(i)}><i class="fa-solid fa-trash"></i></Button>
+      </div>
+    {/each}
+    {/if}
   </div>
   <Button type="submit" class="w-full1">Save device</Button>
 </form>

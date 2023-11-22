@@ -18,10 +18,6 @@
     function onEditDevice()
     {
       editDevice.device_id = device.device_id;
-      editDevice.name = device.name;
-      editDevice.topic = device.topic;
-
-      // TODO
 
       openEditModal = true;
     }
@@ -70,5 +66,5 @@
 {/if}
 
 <Modal bind:open={openEditModal} size="xs" title="Edit device">
-  <EditDeviceForm bind:device={editDevice} onDeviceEdited={onDeviceEdited} />
+  <EditDeviceForm bind:device={editDevice} bind:open={openEditModal} onDeviceEdited={onDeviceEdited} />
 </Modal>
