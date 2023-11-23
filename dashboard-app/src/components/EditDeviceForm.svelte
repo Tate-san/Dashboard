@@ -61,13 +61,13 @@
     <i class="fa-solid fa-bars-staggered m-2 text-white"></i>
     <Input class="h-8 w-full m-0.25 text-xs" id="description" placeholder="Topic" bind:value={$newDevice.topic}/>
   </div>
-  <Button on:click={onAddStructureItem}>AddStructure</Button>
+  <Button class="w-4 self-end" on:click={onAddStructureItem}><i class="fa-solid fa-plus"></Button>
   <div class="flex flex-col w-full gap-2">
     {#if $newDevice.structure}
     {#each $newDevice.structure as structure, i}
       <div class="flex flex-row w-full gap-1">
-        <Input bind:value={structure.real_name} class="h-8 w-full m-0.25 text-xs" />
-        <Input bind:value={structure.alias_name} class="h-8 w-full m-0.25 text-xs" />
+        <Input bind:value={structure.real_name} placeholder="Real name" class="h-8 w-full m-0.25 text-xs" />
+        <Input bind:value={structure.alias_name} placeholder="Alias name" class="h-8 w-full m-0.25 text-xs" />
         <Select bind:value={structure.data_type} items={structureDataTypes} class="h-8 w-full m-0.25 text-xs" />
         <Button class="w-4 bg-red-500 hover:bg-red-700" on:click={() => onDeleteStructureItem(i)}><i class="fa-solid fa-trash"></i></Button>
       </div>
