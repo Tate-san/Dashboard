@@ -114,6 +114,16 @@ impl DeviceModel {
             .await
             .map_err(|err| err.into())
     }
+
+    pub async fn update(&self, conn: &sqlx::Pool<Postgres>, device_id: i32) -> DatabaseResult<PgQueryResult> {
+        sqlx::query(r#"UPDATE devices SET name = $1, topic = $2 WHERE device_id = $3"#)
+            .bind(&self.name)
+            .bind(&self.topic)
+            .bind(device_id)
+            .execute(conn)
+            .await
+            .map_err(|err| err.into())
+    }
 }
 
 impl DeviceStructureModel {
@@ -155,6 +165,17 @@ impl DeviceStructureModel {
             .bind(&self.real_name)
             .bind(&self.alias_name)
             .bind(&self.data_type)
+            .execute(conn)
+            .await
+            .map_err(|err| err.into())
+    }
+
+    pub async fn update(&self, conn: &sqlx::Pool<Postgres>, devicestructure_id: i32) -> DatabaseResult<PgQueryResult> {
+        sqlx::query(r#"UPDATE devicestructure SET real_name = $1, alias_name = $2, data_type = $3 WHERE devicestructure_id = $4"#)
+            .bind(&self.real_name)
+            .bind(&self.alias_name)
+            .bind(&self.data_type)
+            .bind(devicestructure_id)
             .execute(conn)
             .await
             .map_err(|err| err.into())

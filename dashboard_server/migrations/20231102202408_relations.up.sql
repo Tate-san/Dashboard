@@ -27,6 +27,12 @@ ALTER TABLE devicedata
         REFERENCES devices(device_id)
         ON DELETE CASCADE;
 
+ALTER TABLE devicedata 
+    ADD CONSTRAINT fk_devicestructure_id
+        FOREIGN KEY(devicestructure_id) 
+        REFERENCES devicestructure(devicestructure_id)
+        ON DELETE CASCADE;
+
 ALTER TABLE devices 
     ADD CONSTRAINT fk_user_id
         FOREIGN KEY(owner_id) 

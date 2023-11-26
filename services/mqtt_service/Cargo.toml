@@ -1,0 +1,17 @@
+[package]
+name = "mqtt_service"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = { version = "0.4.31", features = ["serde"] }
+dotenv = "0.15.0"
+env_logger = "0.10.1"
+paho-mqtt = { version = "0.12.3" }
+serde = "1.0.193"
+serde_derive = "1.0.193"
+serde_json = "1.0.108"
+sqlx = { version = "0.7.2", features = ["runtime-tokio", "postgres", "chrono"] }
+tokio = { version = "1.34.0", features = ["full"] }

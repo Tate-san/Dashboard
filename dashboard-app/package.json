@@ -33,6 +33,7 @@
 		"d3-scale": "^4.0.2",
 		"d3-shape": "^3.2.0",
 		"flowbite-svelte-icons": "^0.4.5",
+		"fortawesome": "^0.0.1-security",
 		"framework7-svelte": "^8.3.0",
 		"fusioncharts": "^3.21.1",
 		"svelte-fusioncharts": "^1.0.0"

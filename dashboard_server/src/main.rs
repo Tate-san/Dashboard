@@ -28,6 +28,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    println!("Connecting to db: {}", &database_url);
     let pool = match PgPoolOptions::new()
         .max_connections(10)
         .connect(&database_url)
@@ -43,6 +44,15 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
+    match sqlx::migrate!("./migrations")
+        .run(&pool).await {
+            Ok(_) => {
+                println!("Migration has been successfull");
+            }
+            Err(e) => {
+                println!("Unable to migrate: {}", e.to_string());
+            }
+        }
     
     #[derive(OpenApi)]
     #[openapi(
@@ -64,6 +74,7 @@ async fn main() -> std::io::Result<()> {
 
             handler::device_handler::device_new,
             handler::device_handler::device_delete,
+            handler::device_handler::device_update,
             handler::device_handler::device_list,
             handler::device_handler::get_device,
             handler::device_handler::device_insert_structure,
@@ -78,6 +89,8 @@ async fn main() -> std::io::Result<()> {
 
                 schema::device_schema::DeviceNewSchema,
                 schema::device_schema::DeviceStructureNewSchema,
+                schema::device_schema::DeviceUpdateSchema,
+                schema::device_schema::DeviceStructureUpdateSchema,
                 model::device_model::DeviceModel,
                 model::device_model::DeviceListModel,
                 model::device_model::DeviceStructureModel,
