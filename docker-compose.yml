@@ -1,0 +1,73 @@
+version: '3.1'
+
+services:
+  dashboard_db:
+    image: docker.io/postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      PGUSER: $POSTGRES_USER 
+      POSTGRES_USER: $POSTGRES_USER 
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD 
+      POSTGRES_DB: $POSTGRES_DATABASE
+    healthcheck:
+      test: "pg_isready -h db"
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  dashboard_app:
+    restart: always
+    ports:
+      - 80:80
+    build:
+      context: ./dashboard-app
+      dockerfile: Dockerfile
+
+  dashboard_server:
+    depends_on: 
+      dashboard_db:
+        condition: service_healthy
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      DATABASE_URL: $DATABASE_URL 
+      SESSION_KEY: $SESSION_KEY 
+      SERVER_ADDRESS: $SERVER_ADDRESS 
+      SERVER_PORT: $SERVER_PORT 
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@dashboard_db:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+    build:
+      context: ./dashboard_server
+      dockerfile: Dockerfile
+    links:
+      - dashboard_db
+
+  dashboard_mqtt_service:
+    depends_on: 
+      dashboard_db:
+        condition: service_healthy
+      dashboard_server:
+        condition: service_started
+    restart: always
+    environment:
+      DATABASE_URL: $DATABASE_URL 
+      SESSION_KEY: $SESSION_KEY 
+      SERVER_ADDRESS: $SERVER_ADDRESS 
+      SERVER_PORT: $SERVER_PORT 
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+      MQTT_C_CLIENT_TRACE: ON
+      MQTT_C_CLIENT_TRACE_LEVEL: PROTOCOL
+    network_mode: "host"
+    ports:
+      - 443:443
+      - 1883:1883
+      - 1884:1884
+      - 8883:8883
+      - 8884:8884
+    build:
+      context: ./services/mqtt_service
+      dockerfile: Dockerfile
+    links:
+      - dashboard_db

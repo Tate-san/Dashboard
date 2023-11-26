@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM devicestructure WHERE device_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "devicestructure_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "device_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "real_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "alias_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "data_type",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "fe67023f28725066c272952df1e5e30b5a42d908aee721190e4f67c1de05d7f4"
+}

@@ -164,7 +164,7 @@ pub async fn device_update(body: web::Json<DeviceUpdateSchema>,
 
     // Iterate through updated and edit or add missing
     for updated in updated_structure.iter() {
-        if let Some(existing) = current_structure.iter().find(|x| x.devicestructure_id == updated.devicestructure_id) {
+        if let Some(_) = current_structure.iter().find(|x| x.devicestructure_id == updated.devicestructure_id) {
             let new_updated = DeviceStructureModel::new(0, 
                                                                     updated.real_name.clone(), 
                                                                     updated.alias_name.clone(), 
