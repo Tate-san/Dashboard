@@ -69,6 +69,20 @@ impl App {
         println!("Dasboard service connecting to MQTT server {}", HOST);
         let queue = self.message_queue.clone();
         self.mqtt.set_message_callback(move |cli, message| on_mqtt_message(cli, message, queue.clone()));
+        self.mqtt.set_connected_callback(|_|{
+            println!("✅ Successfully connected to MQTT server");
+        });
+
+        self.mqtt.set_connection_lost_callback(|cli|{
+            println!("Lost connection to MQTT server");
+            cli.reconnect();
+        });
+
+        self.mqtt.set_disconnected_callback(|cli, _, _|{
+            println!("Disconnected from MQTT server");
+            cli.reconnect();
+        });
+        
 
         let conn_opts = paho_mqtt::ConnectOptionsBuilder::new_ws()
             .user_name(USERNAME)
@@ -84,7 +98,6 @@ impl App {
             std::process::exit(1);
         }
 
-        println!("✅ Successfully connected to MQTT server");
         self.mqtt.subscribe_many(TOPICS, TOS);
     }
 }
