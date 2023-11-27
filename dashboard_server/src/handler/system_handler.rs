@@ -1,6 +1,6 @@
 use crate::{
     schema::system_schema::SystemNewSchema, 
-    model::{SystemModel, SystemAccessModel, UserModel, DeviceModel, DeviceListModel}
+    model::{SystemModel, SystemAccessModel, UserModel, DeviceModel, DeviceListModel, SystemDetailModel}
 };
 use super::prelude::*;
 
@@ -18,6 +18,12 @@ pub struct SystemQuery {
 pub struct SystemUserQuery {
     pub system_id: i32,
     pub user_id: i32,
+}
+
+#[derive(Deserialize)]
+pub struct SystemDeviceQuery {
+    pub system_id: i32,
+    pub device_id: i32,
 }
 
 #[utoipa::path(
@@ -321,5 +327,102 @@ pub async fn system_get(query: web::Path<SystemQuery>,
         }
     };
 
+    let devices = DeviceListModel::get_system_devices(&data.db, system.system_id).await?;
+
+    let system = SystemDetailModel {
+        owner_id: system.owner_id,
+        system_id: system.system_id,
+        name: system.name,
+        description: system.description,
+        devices: devices
+    };
+
     Ok(HttpResponse::Ok().json(system))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/system/{system_id}/device/{device_id}",
+    responses(
+        (status = 200,),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    ),
+    params(
+            ("system_id" = i32, Path, description = ""),
+            ("device_id" = i32, Path, description = ""),
+        )
+)]
+pub async fn system_device_add(query: web::Path<SystemDeviceQuery>,
+                            identity: Identity,
+                            data: web::Data<AppState>) -> ServerResponse {
+
+    let user_id: i32 = identity.id().unwrap().parse().unwrap();
+
+    let system = match SystemModel::find_by_id(&data.db, query.system_id).await {
+        Ok(system) => {
+            if system.owner_id != user_id {
+                return Ok(HttpResponse::BadRequest().json(
+                    serde_json::json!(ResponseError::SystemNotOwner.get_error())));
+            }
+            system
+        }
+        Err(_) => {
+            return Ok(HttpResponse::BadRequest().json(
+                serde_json::json!(ResponseError::SystemDoesntExist.get_error())));
+        }
+    };
+
+    if let Ok(_) = DeviceListModel::get_system_device(&data.db, query.system_id, query.device_id).await {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!(ResponseError::DeviceAlreadyExistsInSystem.get_error())));
+    }
+
+
+    DeviceListModel::add_device(&data.db, query.device_id, query.system_id).await?;
+
+    Ok(HttpResponse::Ok().finish())
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/system/{system_id}/device/{device_id}",
+    responses(
+        (status = 200,),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    ),
+    params(
+            ("system_id" = i32, Path, description = ""),
+            ("device_id" = i32, Path, description = ""),
+        )
+)]
+pub async fn system_device_delete(query: web::Path<SystemDeviceQuery>,
+                            identity: Identity,
+                            data: web::Data<AppState>) -> ServerResponse {
+
+    let user_id: i32 = identity.id().unwrap().parse().unwrap();
+
+    let system = match SystemModel::find_by_id(&data.db, query.system_id).await {
+        Ok(system) => {
+            if system.owner_id != user_id {
+                return Ok(HttpResponse::BadRequest().json(
+                    serde_json::json!(ResponseError::SystemNotOwner.get_error())));
+            }
+            system
+        }
+        Err(_) => {
+            return Ok(HttpResponse::BadRequest().json(
+                serde_json::json!(ResponseError::SystemDoesntExist.get_error())));
+        }
+    };
+
+    if let Err(_) = DeviceListModel::get_system_device(&data.db, query.system_id, query.device_id).await {
+        return Ok(HttpResponse::BadRequest().json(
+            serde_json::json!(ResponseError::DeviceDoesntExistInSystem.get_error())));
+    }
+
+    DeviceListModel::delete_device(&data.db, query.device_id, query.system_id).await?;
+
+    Ok(HttpResponse::Ok().finish())
 }

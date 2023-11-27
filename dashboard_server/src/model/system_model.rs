@@ -1,4 +1,4 @@
-use super::prelude::*;
+use super::{prelude::*, DeviceListModel};
 
 #[derive(Serialize, Deserialize, ToSchema, Debug)]
 pub struct SystemAccessModel{
@@ -13,6 +13,15 @@ pub struct SystemModel{
     pub owner_id: i32,
     pub name: String,
     pub description: String,
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Debug)]
+pub struct SystemDetailModel{
+    pub system_id: i32,
+    pub owner_id: i32,
+    pub name: String,
+    pub description: String,
+    pub devices: Vec<DeviceListModel>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug)]

@@ -72,6 +72,8 @@ async fn main() -> std::io::Result<()> {
             handler::system_handler::system_add_user,
             handler::system_handler::system_delete_user,
             handler::system_handler::system_user_list,
+            handler::system_handler::system_device_add,
+            handler::system_handler::system_device_delete,
 
             handler::device_handler::device_new,
             handler::device_handler::device_delete,
@@ -98,6 +100,7 @@ async fn main() -> std::io::Result<()> {
 
                 schema::system_schema::SystemNewSchema,
                 model::system_model::SystemListModel,
+                model::system_model::SystemDetailModel,
 
                 model::ErrorModel,
             )

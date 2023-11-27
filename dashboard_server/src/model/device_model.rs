@@ -34,7 +34,40 @@ pub struct DeviceListModel {
     pub topic: String,
 }
 
+#[derive(Serialize, Deserialize, ToSchema, Debug)]
+pub struct SystemDevicesModel {
+    pub systemdevices_id: i32,
+    pub system_id: i32,
+    pub device_id: i32,
+}
+
 impl DeviceListModel {
+    pub async fn add_device(conn: &sqlx::Pool<Postgres>, device_id: i32, system_id: i32) -> DatabaseResult<PgQueryResult> {
+        sqlx::query(r#"INSERT INTO systemdevices(system_id, device_id) VALUES ($1, $2)"#)
+            .bind(system_id)
+            .bind(device_id)
+            .execute(conn)
+            .await
+            .map_err(|err| err.into())
+    }
+
+    pub async fn delete_device(conn: &sqlx::Pool<Postgres>, device_id: i32, system_id: i32) -> DatabaseResult<PgQueryResult> {
+        sqlx::query(r#"DELETE FROM systemdevices where device_id = $1 and system_id = $2"#)
+            .bind(device_id)
+            .bind(system_id)
+            .execute(conn)
+            .await
+            .map_err(|err| err.into())
+    }
+}
+
+impl DeviceListModel {
+    pub async fn get_device(conn: &sqlx::Pool<Postgres>, device_id: i32) -> DatabaseResult<DeviceListModel> {
+        sqlx::query_as!(DeviceListModel, r#"SELECT device_id,owner_id,name,topic FROM devices WHERE device_id = $1"#, device_id)
+            .fetch_one(conn)
+            .await
+            .map_err(|err| err.into())
+    }
     pub async fn get_all_devices(conn: &sqlx::Pool<Postgres>) -> DatabaseResult<Vec<DeviceListModel>> {
         sqlx::query_as!(DeviceListModel, r#"SELECT device_id,owner_id,name,topic FROM devices"#)
             .fetch_all(conn)
@@ -54,6 +87,30 @@ impl DeviceListModel {
             .fetch_one(conn)
             .await
             .map_err(|err| err.into())
+    }
+
+    pub async fn get_system_devices(conn: &sqlx::Pool<Postgres>, system_id: i32) -> DatabaseResult<Vec<DeviceListModel>> {
+        let system_devices = sqlx::query_as!(SystemDevicesModel, r#"SELECT systemdevices_id, system_id, device_id FROM systemdevices WHERE system_id = $1"#, system_id)
+            .fetch_all(conn)
+            .await
+            .map_err(|err| err)?;
+
+        let mut devices: Vec<DeviceListModel> = vec![];
+
+        for system_device in system_devices {
+            let device = DeviceListModel::get_device(conn, system_device.device_id).await?;
+            devices.push(device);
+        }
+
+        Ok(devices)
+    }
+
+    pub async fn get_system_device(conn: &sqlx::Pool<Postgres>, system_id: i32, device_id: i32) -> DatabaseResult<SystemDevicesModel> {
+        sqlx::query_as!(SystemDevicesModel, r#"SELECT systemdevices_id, system_id, device_id FROM systemdevices WHERE system_id = $1 and device_id = $2"#, system_id, device_id)
+            .fetch_one(conn)
+            .await
+            .map_err(|err| err.into())
+
     }
 }
 
