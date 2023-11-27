@@ -32,6 +32,14 @@ export async function getSystemList() {
     return apiRequest("get", `/system/list`, null);
 }
 
+export async function getSystemById(systemId)
+{
+    return apiRequest("get", `/system/${systemId}`, null)
+    .then((data) => {
+        return Promise.resolve(data);
+    })
+}
+
 export async function addSystem(new_system) {
     return apiRequest("post", "/system", new_system);
 }
