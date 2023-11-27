@@ -15,6 +15,7 @@ use prelude::*;
 pub mod user_handler;
 pub mod device_handler;
 pub mod system_handler;
+pub mod kpi_handler;
 
 async fn health_check() -> ServerResponse {
     Ok(HttpResponse::Ok().json(json!({
@@ -55,6 +56,12 @@ pub fn config(conf: &mut web::ServiceConfig) {
                 .route("/{system_id}", web::get().to(system_handler::system_get))
                 .route("/{system_id}", web::patch().to(system_handler::system_update))
                 .route("/{system_id}", web::delete().to(system_handler::system_delete))
+            )
+            .service(web::scope("/kpi")
+                .route("", web::post().to(kpi_handler::kpi_new))
+                .route("/list", web::get().to(kpi_handler::kpi_list))
+                .route("/{kpi_id}", web::delete().to(kpi_handler::kpi_delete))
+                .route("/{kpi_id}", web::post().to(kpi_handler::kpi_update))
             );
             
 

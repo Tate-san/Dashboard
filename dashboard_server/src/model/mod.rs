@@ -1,10 +1,12 @@
 pub mod user_model;
 pub mod device_model;
 pub mod system_model;
+pub mod kpi_model;
 
 pub use user_model::*;
 pub use device_model::*;
 pub use system_model::*;
+pub use kpi_model::*;
 pub use crate::error::DatabaseError;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -55,6 +57,8 @@ pub enum ResponseError {
     DeviceNotOwner,
     DeviceDoesntExist,
     DeviceStructureDoesntExist,
+    KpiDoesntExist,
+    KpiNotOwner,
     InternalError(String),
 }
 
@@ -79,6 +83,8 @@ impl ResponseError {
             Self::DeviceNotOwner => ErrorModel::new("DEVICE_NOT_OWNER", "You are not the owner of the device"),
             Self::DeviceDoesntExist => ErrorModel::new("DEVICE_DOESNT_EXIST", "Device doesn't exist"),
             Self::DeviceStructureDoesntExist => ErrorModel::new("DEVICE_STRUCTURE_DOESNT_EXIST", "Device structure doesn't exist"),
+            Self::KpiDoesntExist => ErrorModel::new("KPI_DOESNT_EXIST", "Kpi doesn't exist"),
+            Self::KpiNotOwner => ErrorModel::new("KPI_NOT_OWNER", "You are not the owner of the KPI"),
             Self::InternalError(message) => ErrorModel::new("INTERNAL_ERROR", message),
         }
     }

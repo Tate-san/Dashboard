@@ -11,6 +11,7 @@ use dotenv::dotenv;
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::{SwaggerUi, Url};
+use crate::model::kpi_model;
 
 mod error;
 mod handler;
@@ -82,6 +83,11 @@ async fn main() -> std::io::Result<()> {
             handler::device_handler::get_device,
             handler::device_handler::device_insert_structure,
             handler::device_handler::device_delete_structure,
+
+            handler::kpi_handler::kpi_new,
+            handler::kpi_handler::kpi_delete,
+            handler::kpi_handler::kpi_update,
+            handler::kpi_handler::kpi_list,
         ), 
         components(
             schemas(
@@ -101,6 +107,10 @@ async fn main() -> std::io::Result<()> {
                 schema::system_schema::SystemNewSchema,
                 model::system_model::SystemListModel,
                 model::system_model::SystemDetailModel,
+
+                schema::kpi_schema::KpiNewSchema,
+                schema::kpi_schema::KpiUpdateSchema,
+                kpi_model::KpiModel,
 
                 model::ErrorModel,
             )

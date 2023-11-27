@@ -403,13 +403,12 @@ pub async fn system_device_delete(query: web::Path<SystemDeviceQuery>,
 
     let user_id: i32 = identity.id().unwrap().parse().unwrap();
 
-    let system = match SystemModel::find_by_id(&data.db, query.system_id).await {
+    match SystemModel::find_by_id(&data.db, query.system_id).await {
         Ok(system) => {
             if system.owner_id != user_id {
                 return Ok(HttpResponse::BadRequest().json(
                     serde_json::json!(ResponseError::SystemNotOwner.get_error())));
             }
-            system
         }
         Err(_) => {
             return Ok(HttpResponse::BadRequest().json(
