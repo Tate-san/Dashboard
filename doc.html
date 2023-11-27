@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html class=" jyqqhmrfc idc0_343"><head>
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-2">
+    <title>Projekt IIS</title>
+    <style type="text/css">
+    	table { border-collapse: collapse; }
+    	td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
+    	dt { font-weight: bold; margin-top: 0.5em; }
+    </style>
+<style>@font-face {
+              font-family: 'Open Sans Regular';
+              font-style: normal;
+              font-weight: 400;
+              src: url('moz-extension://e2af12ae-f439-4e46-ae5b-619fbb508df0/fonts/open_sans/open-sans-v18-latin-regular.woff');
+          }</style><style>@font-face {
+              font-family: 'Open Sans Bold';
+              font-style: normal;
+              font-weight: 800;
+              src: url('moz-extension://e2af12ae-f439-4e46-ae5b-619fbb508df0/fonts/open_sans/OpenSans-Bold.woff');
+          }</style><style>@font-face {
+              font-family: 'Open Sans ExtraBold';
+              font-style: normal;
+              font-weight: 800;
+              src: url('moz-extension://e2af12ae-f439-4e46-ae5b-619fbb508df0/fonts/open_sans/open-sans-v18-latin-800.woff');
+          }</style><script src="doc_files/page-script.js"></script></head>
+<body>
+
+<!-- Zkontrolujte prosím nastavení kódování v hlavičce dokumentu 
+     podle použitého editoru -->
+
+<h1>IoT: správa zařízení</h1> <!-- Nahradte názvem svého zadání -->
+
+<dl>
+	<dt>Autoři</dt>
+	<dd>Matyáš Burnek <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+	    <a href="mailto:xburne00@stud.fit.vutbr.cz">xburne00@stud.fit.vutbr.cz</a> -
+        Backend, DB, Deployment
+	</dd>
+	<dd>Matsvei Hauryliuk <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+	    <a href="mailto:xhaury00@stud.fit.vutbr.cz">xhaury00@stud.fit.vutbr.cz</a> - 
+		Frontend, Deployment, Mockup
+	</dd>
+  <dd>Jindřich Vodák <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+	    <a href="mailto:xvodak06@stud.fit.vutbr.cz">xvodak06@stud.fit.vutbr.cz</a> - 
+		Frontend, Mockup, Návrh komponent
+	</dd>
+	<dt>URL aplikace</dt>
+	<dd><a href="http://tates.eu">http://tates.eu</a></dd>
+</dl>
+
+<h2>Uživatelé systému pro testování</h2>
+<p>Uveďte prosím existující zástupce <strong>všech rolí uživatelů</strong>.</p>
+<table>
+<tbody><tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
+<tr><td>walter</td><td>walter</td><td>Uživatel</td></tr>
+<tr><td>gustavo</td><td>gustavo</td><td>Uživatel</td></tr>
+<tr><td>jesse</td><td>jesse</td><td>Uživatel</td></tr>
+</tbody></table>
+
+<p>(Diagram případů užití není nutné vkládat, pokud IS implementuje role a případy užití definované zadáním.)</p> 
+
+<h3>Video</h3>
+<p><a href="https://drive.google.com/drive/u/2/folders/1h1IRgFLL0wVLVLXdIOEIv2DDHP5e5rkb">https://drive.google.com/drive/u/2/folders/1h1IRgFLL0wVLVLXdIOEIv2DDHP5e5rkb</a></p>
+
+<h2>Implementace</h2>
+<p>Bylo přidáno rozšíření, ktere propojuje systém s realným MQTT brokerem.</p>
+
+Systém se skládá ze tří hlavních komponent
+<ul>
+    <li>Backend (dashboard_server)</li>
+    <li>Frontend (dashboard-app)</li>
+    <li>MQTT service (services/mqtt_service)</li>
+</ul>
+
+<h4>Backend</h4>
+Backend se skládá z několika hlavních částí
+<ul>
+    <li>handler - Stará se o všechny příchozí requesty</li>
+    <li>model - Reprezentace dat ve formě objektů, později převáděných do JSON formátu</li>
+    <li>schema - Objekty převáděny z JSON formátu. Používány při vytváření či upravování dat</li>
+</ul>
+
+
+
+
+<h4>Frontend</h4>
+Frontend využívá JS frameworku Svelte, UI komponent flowbite a fontu ikon FontAwesome. <br>
+
+Pro komunikaci s backendem se využívá tzv. "hooks", které usnadňují práci při vytváření požadavků na server, starají se o toast notifikace a primárně o autentizaci.
+Autentizace se nachází v souboru auth.js, který obsahuje funkce pro přihlášení, odhlášení, registrování a ověření, zda je uživatel přihlášen. 
+Správnost relace je ověřována pomocí cookies, které server po úspěšném přihlášení dodá. <br>
+
+Základní layout pro celý systém se nachází ve složce layouts a obsahuje navigační bar a komponentu, kde se zobrazují toast notifikace. <br>
+
+Jednotlivé komponenty, které jsou používány napříč systémem jsou uloženy ve složce components.
+
+<h4>MQTT service</h4>
+Stará se o naslouchání na MQTT brokeru, kde jsou posílána data o IoT zařízeních. Poté tato data zparsuje a přiřadí do databáze k příslušnému zařízení, které obsahuje dané položky. Pokud nějakou z položek neobsahuje, tak je položka ignorována.
+
+<h3>Databáze</h3>
+
+<img src="database_diagram.png" width="700"/>
+
+<h2>Instalace</h2>
+
+Stručně popište: 
+<ul>
+    <li>Pro spuštění systému přes docker je potřeba mít nainstalovaný docker compose. Poté stačí jen spustit <code>docker-compose up</code> a vše ostatní se nastaví automaticky.</li>
+    <li>Pro manuální spuštění je třeba mít nainstalované rust cargo, docker, npm a postupovat v následujících složkách.
+        <ul>
+            <li><code>dashboard_server</code></li>
+            <ul>
+                <li>Napřed je nutné spustit databázi příkazem <code>docker-compose up</code></li>
+                <li>Dále je třeba nainstalovat <code>cargo install sqlx-cli</code> a se spuštěnou databází migrovat pomocí <code>sqlx migrate run</code></li>
+                <li><code>cargo run</code> poté spouští samotný server</li>
+            </ul>
+            <li><code>dashboard-app</code></li>
+            <ul>
+                <li>Pro spuštění webové aplikace je nutné nainstalovat všechny npm balíčky <code>npm install</code></li>
+                <li>Spouštění probíhá příkazem <code>npm run dev</code></li>
+            </ul>
+        </ul>
+    </li>
+</ul>
+
+<h2>Známé problémy</h2>
+<p>Z časových důvodů bohužel nebylo implementováno zobrazování dat, přidávání ostatních uživatelů do systémů, funkční KPI systém, ale struktura byla implementována.</p>
+
+
+
+</body></html>
