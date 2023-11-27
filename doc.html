@@ -57,8 +57,6 @@
 <tr><td>jesse</td><td>jesse</td><td>U¾ivatel</td></tr>
 </tbody></table>
 
-<p>(Diagram pøípadù u¾ití není nutné vkládat, pokud IS implementuje role a pøípady u¾ití definované zadáním.)</p> 
-
 <h3>Video</h3>
 <p><a href="https://drive.google.com/drive/u/2/folders/1h1IRgFLL0wVLVLXdIOEIv2DDHP5e5rkb">https://drive.google.com/drive/u/2/folders/1h1IRgFLL0wVLVLXdIOEIv2DDHP5e5rkb</a></p>
 
@@ -73,14 +71,13 @@ Systém se skládá ze tøí hlavních komponent
 </ul>
 
 <h4>Backend</h4>
-Backend se skládá z nìkolika hlavních èástí
+Backend na zaèátku naèítá nastavení ze souboru .env, díky kterému se inicializuje. Poté se pokou¹í pøipojit do databáze. Jestli¾e spojení s databází je úspì¹né, spustí se Actix server. <br>
+Server se skládá z nìkolika hlavních èástí:
 <ul>
     <li>handler - Stará se o v¹echny pøíchozí requesty</li>
     <li>model - Reprezentace dat ve formì objektù, pozdìji pøevádìných do JSON formátu</li>
     <li>schema - Objekty pøevádìny z JSON formátu. Pou¾ívány pøi vytváøení èi upravování dat</li>
 </ul>
-
-
 
 
 <h4>Frontend</h4>
