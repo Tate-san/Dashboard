@@ -38,6 +38,9 @@ export async function getSystemById(systemId)
     .then((data) => {
         return Promise.resolve(data);
     })
+    .catch((e) => {
+        return Promise.reject(e);
+    })
 }
 
 export async function addSystem(new_system) {

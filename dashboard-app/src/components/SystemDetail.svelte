@@ -7,13 +7,39 @@
     import Modal from "./Modal.svelte";
     import Device from "./Device.svelte";
     import EditSystemForm from "./EditSystemForm.svelte";
+    import { getSystemById } from "../hooks/systems";
+    import { writable } from "svelte/store";
+    import { onMount, afterUpdate } from "svelte";
 
+    export let systemId;
     export let onSystemChanged = () => {};
-    export let system = {};
+    export let system = writable({});
+
     let editSystem = {};
     let dropdownOpen = false;
     let openEditModal = false;
     $: isOwner = system.owner_id && (system.owner_id === $auth_store.id);
+
+    function fetchSystem(){
+        getSystemById(systemId)
+        .then((data) => {
+            system.set(data);
+        })
+        .catch((e) => {
+            addToast({
+                message: e.message,
+                type: "error"
+            });
+        })
+    }
+
+    onMount(() => {
+        fetchSystem(); 
+        auth_store.subscribe(() => {
+            fetchSystem();
+        });
+        console.log(`systemId = ${systemId}`);
+    });
 
     function systemDelete(){
         if(!system) return;
@@ -33,11 +59,6 @@
         window.location.href = '/';
     }
 
-    function test()
-    {
-        window.location.href = '/';
-    }
-
     function onEditSystem(){
       editSystem.system_id = system.system_id;
       editSystem.name = system.name;
@@ -49,7 +70,6 @@
     function onSystemEdited(){
       openEditModal = false;
       onSystemChanged();
-
     }
 
 </script>
@@ -61,10 +81,7 @@
       text-white cursor-pointer">
     <div class="z-10 px-8 py-4" role="button" tabindex="0">
       <h4 class="text-lg font-bold w-[90%] underline">{system.name}</h4>
-      <p class="text-xs">{system.description}</p>
-      {#each  as device}
-        <Device bind:device onDeviceChanged={fetchDeviceList} />
-      {/each}
+      <p class="text-xs"></p>
     </div>
     {#if isOwner}
       <DotsHorizontalOutline class="text-white absolute top-0.5 right-1 z-50" />
