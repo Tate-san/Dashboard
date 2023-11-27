@@ -1,6 +1,6 @@
 use crate::{
     schema::system_schema::SystemNewSchema, 
-    model::{SystemModel, SystemAccessModel, UserModel}
+    model::{SystemModel, SystemAccessModel, UserModel, DeviceModel, DeviceListModel}
 };
 use super::prelude::*;
 
@@ -287,4 +287,39 @@ pub async fn system_user_list(query: web::Path<SystemQuery>,
     let user_list = UserModel::list_users_in_system(&data.db, query.system_id).await?;
 
     Ok(HttpResponse::Ok().json(user_list))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/system/{system_id}",
+    responses(
+        (status = 200,),
+        (status = 400, body = ErrorModel),
+        (status = 401),
+    ),
+    params(
+            ("system_id" = i32, Path, description = ""),
+        )
+)]
+pub async fn system_get(query: web::Path<SystemQuery>,
+                            identity: Identity,
+                            data: web::Data<AppState>) -> ServerResponse {
+
+    let user_id: i32 = identity.id().unwrap().parse().unwrap();
+
+    let system = match SystemModel::find_by_id(&data.db, query.system_id).await {
+        Ok(system) => {
+            if system.owner_id != user_id {
+                return Ok(HttpResponse::BadRequest().json(
+                    serde_json::json!(ResponseError::SystemNotOwner.get_error())));
+            }
+            system
+        }
+        Err(_) => {
+            return Ok(HttpResponse::BadRequest().json(
+                serde_json::json!(ResponseError::SystemDoesntExist.get_error())));
+        }
+    };
+
+    Ok(HttpResponse::Ok().json(system))
 }
