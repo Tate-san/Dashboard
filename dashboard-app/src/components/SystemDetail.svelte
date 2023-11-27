@@ -11,14 +11,14 @@
     import { writable } from "svelte/store";
     import { onMount, afterUpdate } from "svelte";
 
-    export let systemId;
-    export let onSystemChanged = () => {};
-    export let system = writable({});
+    let systemId;
+    let onSystemChanged = () => {};
+    let system = writable({});
 
     let editSystem = {};
     let dropdownOpen = false;
     let openEditModal = false;
-    $: isOwner = system.owner_id && (system.owner_id === $auth_store.id);
+    $: isOwner = $system.owner_id && ($system.owner_id === $auth_store.id);
 
     function fetchSystem(){
         getSystemById(systemId)
@@ -34,6 +34,8 @@
     }
 
     onMount(() => {
+        const queryParams = new URLSearchParams(window.location.search);
+        systemId = queryParams.get('id');
         fetchSystem(); 
         auth_store.subscribe(() => {
             fetchSystem();
@@ -42,9 +44,9 @@
     });
 
     function systemDelete(){
-        if(!system) return;
+        if(!$system) return;
 
-        deleteSystem(system.system_id)
+        deleteSystem($system.system_id)
         .then(() => {
           onSystemChanged();
           openEditModal = false;
@@ -60,9 +62,9 @@
     }
 
     function onEditSystem(){
-      editSystem.system_id = system.system_id;
-      editSystem.name = system.name;
-      editSystem.description = system.description;
+      editSystem.system_id = $system.system_id;
+      editSystem.name = $system.name;
+      editSystem.description = $system.description;
 
       openEditModal = true;
     }
@@ -70,17 +72,18 @@
     function onSystemEdited(){
       openEditModal = false;
       onSystemChanged();
+      window.location.href = `/system/?id=${systemId}`;
     }
 
 </script>
 
-{#if system}
+{#if $system}
   <div class="relative flex flex-col max-w-[36rem] gap-1 
       bg-secondary-800 hover:bg-secondary-950 border 
       border-secondary-900 hover:border-primary-400 rounded-lg 
       text-white cursor-pointer">
     <div class="z-10 px-8 py-4" role="button" tabindex="0">
-      <h4 class="text-lg font-bold w-[90%] underline">{system.name}</h4>
+      <h4 class="text-lg font-bold w-[90%] underline">{$system.name}</h4>
       <p class="text-xs"></p>
     </div>
     {#if isOwner}
