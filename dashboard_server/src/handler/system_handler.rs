@@ -299,7 +299,7 @@ pub async fn system_user_list(query: web::Path<SystemQuery>,
     get,
     path = "/api/system/{system_id}",
     responses(
-        (status = 200,),
+        (status = 200, body = SystemDetailModel),
         (status = 400, body = ErrorModel),
         (status = 401),
     ),
