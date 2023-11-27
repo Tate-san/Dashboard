@@ -1,6 +1,6 @@
 <script>
     import { Button, Dropdown, DropdownItem } from "flowbite-svelte";
-    import { deleteSystem } from "../hooks/systems";
+    import { deleteSystem, removeDeviceFromSystem } from "../hooks/systems";
     import { addToast } from "../hooks/toast";
     import { auth_store } from "../hooks/auth";
     import { DotsHorizontalOutline } from "flowbite-svelte-icons";
@@ -11,6 +11,7 @@
     import { writable } from "svelte/store";
     import { onMount, afterUpdate, createEventDispatcher } from "svelte";
     import { getDeviceList } from "../hooks/devices";
+    import { addDeviceToSystem } from "../hooks/systems";
 
     let systemId;
     let onSystemChanged = () => {};
@@ -106,6 +107,18 @@
       window.location.href = `/system/?id=${systemId}`;
     }
 
+    function addDevice(device_id, system_id)
+    {
+        addDeviceToSystem(device_id, system_id);
+        window.location.href = `/system/?id=${systemId}`;
+    }
+
+    function removeDevice(device_id, system_id)
+    {
+        removeDeviceFromSystem(device_id, system_id);
+        window.location.href = `/system/?id=${systemId}`;
+    }
+
 </script>
 
 {#if $system}
@@ -116,11 +129,24 @@
     <div class="z-10 px-8 py-4" role="button" tabindex="0">
       <p class="text-lg font-bold w-[90%]">Name: {$system.name}</p>
       <p class="text-m">Description: {$system.description}</p>
-      {#each $devices as device}
+      <div>
+        {#each $devices as device}
         <Device bind:device />
-      {:else}
+        <Button on:click={() => removeDevice(device.device_id, $system.system_id)}>Remove from system</Button>
+        {:else}
         <p>No devices</p>
-      {/each}
+         {/each}
+      </div>
+      <div>
+        <Button>Add device</Button>
+        <Dropdown>
+            {#each $allDevices as device}
+                <DropdownItem on:click={() => addDevice(device.device_id, $system.system_id)}>{device.name}</DropdownItem>
+            {:else}
+                <p>No devices</p>
+            {/each}
+        </Dropdown>
+      </div>
     </div>
     {#if isOwner}
       <DotsHorizontalOutline class="text-white absolute top-0.5 right-1 z-50" />

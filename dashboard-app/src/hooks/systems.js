@@ -45,7 +45,12 @@ export async function getSystemById(systemId)
 
 export async function addDeviceToSystem(device_id, system_id)
 {
-    return apiRequest("post", `/system/${system_id}/device/`, device_id);
+    return apiRequest("post", `/system/${system_id}/device/${device_id}`, null);
+}
+
+export async function removeDeviceFromSystem(device_id, system_id)
+{
+    return apiRequest("delete", `/system/${system_id}/device/${device_id}`, null);
 }
 
 export async function addSystem(new_system) {
