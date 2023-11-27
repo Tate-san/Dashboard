@@ -9,11 +9,14 @@
     import EditSystemForm from "./EditSystemForm.svelte";
     import { getSystemById } from "../hooks/systems";
     import { writable } from "svelte/store";
-    import { onMount, afterUpdate } from "svelte";
+    import { onMount, afterUpdate, createEventDispatcher } from "svelte";
+    import { getDeviceList } from "../hooks/devices";
 
     let systemId;
     let onSystemChanged = () => {};
     let system = writable({});
+    let devices = writable([]);
+    let allDevices = writable([]);
 
     let editSystem = {};
     let dropdownOpen = false;
@@ -31,6 +34,34 @@
                 type: "error"
             });
         })
+        fetchDevices();
+    }
+
+    async function fetchDevices()
+    {
+        if ($system.devices === undefined) {
+        // Fetch the system data if not available
+        const data = await getSystemById(systemId).catch((e) => {
+            addToast({
+                message: e.message,
+                type: "error"
+            });
+        });
+
+        // Set devices to an empty array if data is still not available
+        devices.set(data ? data.devices || [] : []);
+    } else {
+        // $system.devices is already available, use it
+        devices.set($system.devices || []);
+    }
+    }
+
+    function fetchAllDevices()
+    {
+        getDeviceList()
+        .then((data) => {
+            allDevices.set(data || []);
+        })
     }
 
     onMount(() => {
@@ -40,7 +71,7 @@
         auth_store.subscribe(() => {
             fetchSystem();
         });
-        console.log(`systemId = ${systemId}`);
+        fetchAllDevices();
     });
 
     function systemDelete(){
@@ -78,13 +109,18 @@
 </script>
 
 {#if $system}
-  <div class="relative flex flex-col max-w-[36rem] gap-1 
+  <div class="relative flex flex-col max-w-[72rem] gap-1 
       bg-secondary-800 hover:bg-secondary-950 border 
       border-secondary-900 hover:border-primary-400 rounded-lg 
       text-white cursor-pointer">
     <div class="z-10 px-8 py-4" role="button" tabindex="0">
-      <h4 class="text-lg font-bold w-[90%] underline">{$system.name}</h4>
-      <p class="text-xs"></p>
+      <p class="text-lg font-bold w-[90%]">Name: {$system.name}</p>
+      <p class="text-m">Description: {$system.description}</p>
+      {#each $devices as device}
+        <Device bind:device />
+      {:else}
+        <p>No devices</p>
+      {/each}
     </div>
     {#if isOwner}
       <DotsHorizontalOutline class="text-white absolute top-0.5 right-1 z-50" />
@@ -95,7 +131,3 @@
     {/if}
   </div>
 {/if}
-
-<Modal bind:open={openEditModal} size="xs" title="Edit system">
-  <EditSystemForm bind:system={editSystem} onSystemEdited={onSystemEdited} />
-</Modal>

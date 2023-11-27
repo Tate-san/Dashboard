@@ -25,7 +25,6 @@
     function onDeviceEdited(){
       openEditModal = false;
       onDeviceChanged();
-
     }
 
     function deviceDelete(){
