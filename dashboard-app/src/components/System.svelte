@@ -45,8 +45,8 @@
 
     }
 
-    function systemOpen(){
-      console.log("Open system " + system.system_id);
+    function systemOpen(systemId){
+      window.location.href = `/system/?id=${systemId}`;
     }
 
 </script>
@@ -56,7 +56,7 @@
       bg-secondary-800 hover:bg-secondary-950 border 
       border-secondary-900 hover:border-primary-400 rounded-lg 
       text-white cursor-pointer">
-    <div class="z-10 px-8 py-4" on:click={systemOpen} on:keypress={systemOpen} role="button" tabindex="0">
+    <div class="z-10 px-8 py-4" on:click={() => systemOpen(system.system_id)} on:keypress={() => systemOpen(system.system_id)} role="button" tabindex="0">
       <h4 class="text-lg font-bold w-[90%] underline">{system.name}</h4>
       <p class="text-xs">{system.description}</p>
     </div>
