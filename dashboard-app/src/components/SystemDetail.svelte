@@ -157,3 +157,7 @@
     {/if}
   </div>
 {/if}
+
+<Modal bind:open={openEditModal} size="xs" title="Edit system">
+    <EditSystemForm bind:system={editSystem} onSystemEdited={onSystemEdited} />
+</Modal>
